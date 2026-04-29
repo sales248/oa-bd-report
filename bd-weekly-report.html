@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="data-last-updated" content="2026-04-29" />
+  <meta name="data-cycle" content="Tuesday-Monday" />
+  <title>OA BD Weekly Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:       #0f1117;
+      --surface:  #1a1d27;
+      --surface2: #232738;
+      --border:   #2e3248;
+      --accent:   #4f6ef7;
+      --accent2:  #7c3aed;
+      --green:    #22c55e;
+      --yellow:   #f59e0b;
+      --red:      #ef4444;
+      --cyan:     #06b6d4;
+      --orange:   #f97316;
+      --text:     #e2e8f0;
+      --muted:    #8892a4;
+      --radius:   12px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #1a1d27 0%, #1e213a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 68px; position: sticky; top: 0; z-index: 100;
+    }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .logo {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px; display: grid; place-items: center;
+      font-weight: 800; font-size: 18px; color: #fff;
+    }
+    .header h1 { font-size: 16px; font-weight: 700; letter-spacing: .02em; }
+    .header h1 span { color: var(--accent); }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .week-badge {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 14px;
+      font-size: 13px; font-weight: 600; color: var(--accent);
+    }
+    .fresh-badge {
+      background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3);
+      border-radius: 8px; padding: 5px 10px;
+      font-size: 11px; font-weight: 700; color: var(--green); letter-spacing: .04em;
+    }
+    .stale-badge {
+      background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.3);
+      border-radius: 8px; padding: 5px 10px;
+      font-size: 11px; font-weight: 700; color: var(--yellow); letter-spacing: .04em;
+    }
+    .btn {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 8px; padding: 8px 18px;
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+
+    /* LAYOUT */
+    .shell { display: flex; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 220px; min-height: calc(100vh - 68px);
+      background: var(--surface); border-right: 1px solid var(--border);
+      padding: 20px 12px; flex-shrink: 0;
+    }
+    .sidebar-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--muted);
+      padding: 0 8px; margin-bottom: 6px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 8px; cursor: pointer;
+      font-size: 13.5px; color: var(--muted); transition: all .15s; user-select: none;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: rgba(79,110,247,.15); color: var(--accent); font-weight: 600; }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+    .sidebar-stat { padding: 0 12px; font-size: 12.5px; color: var(--muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
+
+    /* MAIN */
+    .main { flex: 1; padding: 28px 32px; overflow-x: hidden; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* SECTION TITLES */
+    .section-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .section-sub { color: var(--muted); font-size: 13.5px; margin-bottom: 24px; }
+
+    /* WEEK NAV */
+    .week-nav {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 24px; padding: 12px 16px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    }
+    .week-nav-label { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+    .week-tabs { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+    .week-tab {
+      padding: 5px 14px; border-radius: 6px;
+      font-size: 12.5px; font-weight: 600;
+      border: 1px solid var(--border); background: transparent; color: var(--muted);
+      cursor: pointer; transition: all .15s;
+    }
+    .week-tab:hover { border-color: var(--accent); color: var(--accent); }
+    .week-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .week-tab.no-data { opacity: .4; cursor: not-allowed; }
+    .week-tab.no-data:hover { border-color: var(--border); color: var(--muted); }
+    .next-update { margin-left: auto; font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+    /* KPI GRID */
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 16px; margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+      position: relative; overflow: hidden;
+    }
+    .kpi-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--accent-color, var(--accent));
+    }
+    .kpi-label { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 10px; }
+    .kpi-value { font-size: 32px; font-weight: 800; line-height: 1; margin-bottom: 8px; }
+    .kpi-sub { font-size: 11.5px; color: var(--muted); margin-bottom: 6px; }
+    .kpi-delta {
+      font-size: 12px; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: 99px;
+    }
+    .kpi-delta.up   { background: rgba(34,197,94,.12);  color: var(--green); }
+    .kpi-delta.down { background: rgba(239,68,68,.12);  color: var(--red); }
+    .kpi-delta.flat { background: rgba(245,158,11,.12); color: var(--yellow); }
+
+    /* CHARTS */
+    .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 28px; }
+    .chart-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+    }
+    .chart-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
+    .chart-card canvas { max-height: 220px; }
+
+    /* TABLES */
+    .table-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin-bottom: 28px;
+    }
+    .table-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+    }
+    .table-header h3 { font-size: 14px; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .07em; color: var(--muted);
+      padding: 10px 20px; text-align: left; background: var(--surface2);
+    }
+    td { padding: 13px 20px; font-size: 13.5px; border-top: 1px solid var(--border); }
+    tr:hover td { background: rgba(255,255,255,.02); }
+
+    /* BADGES */
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+    .badge-green  { background: rgba(34,197,94,.15);  color: var(--green); }
+    .badge-yellow { background: rgba(245,158,11,.15); color: var(--yellow); }
+    .badge-red    { background: rgba(239,68,68,.15);  color: var(--red); }
+    .badge-blue   { background: rgba(79,110,247,.15); color: var(--accent); }
+    .badge-cyan   { background: rgba(6,182,212,.15);  color: var(--cyan); }
+    .badge-orange { background: rgba(249,115,22,.15); color: var(--orange); }
+    .badge-muted  { background: rgba(136,146,164,.12); color: var(--muted); }
+
+    /* TWO-COL */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+    .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+
+    /* FUNNEL */
+    .funnel-wrap { display: flex; flex-direction: column; gap: 0; margin-bottom: 28px; }
+    .funnel-stage {
+      display: flex; align-items: stretch; gap: 0;
+      position: relative;
+    }
+    .funnel-bar-wrap {
+      flex: 1; padding: 2px 0;
+      display: flex; align-items: center;
+    }
+    .funnel-bar {
+      height: 52px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 18px; transition: width .5s ease;
+      min-width: 120px;
+    }
+    .funnel-bar-label { font-size: 13px; font-weight: 700; color: #fff; }
+    .funnel-bar-count { font-size: 22px; font-weight: 800; color: #fff; }
+    .funnel-arrow {
+      width: 48px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; flex-shrink: 0;
+      font-size: 11px; font-weight: 700; color: var(--muted);
+    }
+    .funnel-arrow span { font-size: 18px; line-height: 1; }
+    .funnel-aside {
+      width: 200px; flex-shrink: 0; display: flex; align-items: center;
+      padding-left: 16px; font-size: 12px; color: var(--muted);
+    }
+
+    /* BOTTLENECK CARD */
+    .bottleneck-card {
+      background: rgba(239,68,68,.06); border: 1px solid rgba(239,68,68,.25);
+      border-radius: var(--radius); padding: 20px; margin-bottom: 28px;
+    }
+    .bottleneck-card h3 { font-size: 15px; font-weight: 700; color: var(--red); margin-bottom: 8px; }
+    .bottleneck-card p { font-size: 13.5px; color: var(--text); line-height: 1.6; }
+
+    /* ACTION CARDS */
+    .action-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+    .action-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .action-num {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: grid; place-items: center; flex-shrink: 0;
+      font-size: 14px; font-weight: 800;
+    }
+    .action-num.fix    { background: rgba(239,68,68,.15);  color: var(--red); }
+    .action-num.stop   { background: rgba(249,115,22,.15); color: var(--orange); }
+    .action-num.double { background: rgba(34,197,94,.15);  color: var(--green); }
+    .action-num.track  { background: rgba(79,110,247,.15); color: var(--accent); }
+    .action-num.improve { background: rgba(245,158,11,.15); color: var(--yellow); }
+    .action-body { flex: 1; }
+    .action-tag {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .08em; margin-bottom: 4px;
+    }
+    .action-tag.fix    { color: var(--red); }
+    .action-tag.stop   { color: var(--orange); }
+    .action-tag.double { color: var(--green); }
+    .action-tag.track  { color: var(--accent); }
+    .action-tag.improve { color: var(--yellow); }
+    .action-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .action-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+    /* PROGRESS BAR */
+    .progress-list { display: flex; flex-direction: column; gap: 14px; }
+    .progress-item { display: block; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+    .progress-label span:last-child { color: var(--muted); font-size: 12px; }
+    .progress-bar { height: 6px; border-radius: 99px; background: var(--surface2); overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+
+    /* INSIGHT CARDS */
+    .insight-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+    .insight-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+    }
+    .insight-card h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 12px; }
+    .insight-card h4.good  { color: var(--green); }
+    .insight-card h4.bad   { color: var(--red); }
+    .insight-card h4.warn  { color: var(--yellow); }
+    .insight-item { font-size: 13px; color: var(--text); margin-bottom: 8px; padding-left: 12px; border-left: 2px solid var(--border); }
+    .insight-item:last-child { margin-bottom: 0; }
+
+    /* PIPELINE NOTE */
+    .note-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .note-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px 16px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .note-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .note-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .chart-row, .two-col, .three-col, .insight-row { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main { padding: 20px 16px; }
+    }
+
+    @media print {
+      .sidebar, .header, .week-nav { display: none !important; }
+      .main { padding: 0; }
+      body { background: #fff; color: #000; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo">BD</div>
+    <h1>OA <span>BD Weekly Report</span></h1>
+  </div>
+  <div class="header-right">
+    <div class="week-badge" id="currentWeekLabel">W17 &middot; Apr 22&ndash;28, 2026</div>
+    <div id="freshnessbadge" class="fresh-badge">&#9679; LIVE DATA</div>
+    <button class="btn btn-ghost" onclick="window.print()">&#9113; Print</button>
+    <button class="btn" onclick="exportReport()">&#8595; Export</button>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-label">Report Sections</div>
+    <div class="nav-item active" onclick="switchPage('summary', this)">
+      <span class="nav-icon">&#128202;</span> Executive Summary
+    </div>
+    <div class="nav-item" onclick="switchPage('funnel', this)">
+      <span class="nav-icon">&#128260;</span> Funnel Performance
+    </div>
+    <div class="nav-item" onclick="switchPage('sources', this)">
+      <span class="nav-icon">&#128269;</span> Lead Source Analysis
+    </div>
+    <div class="nav-item" onclick="switchPage('quality', this)">
+      <span class="nav-icon">&#127942;</span> Lead Quality
+    </div>
+    <div class="nav-item" onclick="switchPage('actions', this)">
+      <span class="nav-icon">&#9889;</span> Action Plan
+    </div>
+    <hr class="sidebar-divider" />
+    <div class="sidebar-label">This Week (W17)</div>
+    <div class="sidebar-stat"><span>Contacts</span><strong style="color:var(--text)" id="sb-contacts">77</strong></div>
+    <div class="sidebar-stat"><span>Valid</span><strong style="color:var(--cyan)" id="sb-valid">9</strong></div>
+    <div class="sidebar-stat"><span>Connected</span><strong style="color:var(--green)" id="sb-connected">2</strong></div>
+    <div class="sidebar-stat"><span>Deals</span><strong style="color:var(--accent)" id="sb-deals">27</strong></div>
+    <div class="sidebar-stat"><span>Valid Rate</span><strong style="color:var(--yellow)" id="sb-valid-pct">11.7%</strong></div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- WEEK NAVIGATOR -->
+    <div class="week-nav">
+      <span class="week-nav-label">WEEK (Tue&ndash;Mon):</span>
+      <div class="week-tabs">
+        <button class="week-tab no-data" title="No data yet" disabled>W14 Apr 1&ndash;7</button>
+        <button class="week-tab no-data" title="No data yet" disabled>W15 Apr 8&ndash;14</button>
+        <button class="week-tab" data-week="16" onclick="selectWeek(16, this)">W16 Apr 15&ndash;21</button>
+        <button class="week-tab active" data-week="17" onclick="selectWeek(17, this)">W17 Apr 22&ndash;28</button>
+      </div>
+      <span class="next-update" id="nextUpdateLabel">Next update: May 5, 2026</span>
+    </div>
+
+    <!-- ===== PAGE: EXECUTIVE SUMMARY ===== -->
+    <div class="page active" id="page-summary">
+      <div class="section-title">Executive Summary</div>
+      <div class="section-sub" id="summary-sub">OA Business Development &middot; Week 17 &middot; Apr 22&ndash;28, 2026</div>
+
+      <!-- KPI CARDS -->
+      <div class="kpi-grid">
+        <div class="kpi-card" style="--accent-color:var(--accent)">
+          <div class="kpi-label">Total Contacts</div>
+          <div class="kpi-value" style="color:var(--accent)" id="kpi-contacts">77</div>
+          <div class="kpi-sub" id="kpi-contacts-sub">BD Lead category</div>
+          <span class="kpi-delta down" id="kpi-contacts-delta">&#9660; 36% vs W16 (120)</span>
+        </div>
+        <div class="kpi-card" style="--accent-color:var(--cyan)">
+          <div class="kpi-label">Valid Leads</div>
+          <div class="kpi-value" style="color:var(--cyan)" id="kpi-valid">9</div>
+          <div class="kpi-sub" id="kpi-valid-sub">4 Valid &middot; 5 Valid-NI</div>
+          <span class="kpi-delta down" id="kpi-valid-delta">&#9660; 47% vs W16 (17)</span>
+        </div>
+        <div class="kpi-card" style="--accent-color:var(--green)">
+          <div class="kpi-label">Connected Leads</div>
+          <div class="kpi-value" style="color:var(--green)" id="kpi-connected">2</div>
+          <div class="kpi-sub" id="kpi-connected-sub">22.2% of valid leads</div>
+          <span class="kpi-delta flat" id="kpi-connected-delta">&#61; Flat vs W16</span>
+        </div>
+        <div class="kpi-card" style="--accent-color:var(--accent2)">
+          <div class="kpi-label">Deals Created</div>
+          <div class="kpi-value" style="color:var(--accent2)" id="kpi-deals">27</div>
+          <div class="kpi-sub" id="kpi-deals-sub">4 BD &middot; 23 CS pipeline</div>
+          <span class="kpi-delta up" id="kpi-deals-delta">&#9650; +108% vs W16 (13)</span>
+        </div>
+      </div>
+
+      <!-- TREND + BREAKDOWN CHART -->
+      <div class="chart-row">
+        <div class="chart-card">
+          <h3>Weekly Trend &mdash; Contacts / Valid / Connected</h3>
+          <canvas id="trendChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Lead Disposition (W17)</h3>
+          <canvas id="dispositionChart" style="max-height:220px"></canvas>
+        </div>
+      </div>
+
+      <!-- WoW TABLE -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Week-over-Week Comparison</h3>
+          <span class="badge badge-muted">W16 vs W17</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>W16 (Apr 15&ndash;21)</th>
+              <th>W17 (Apr 22&ndash;28)</th>
+              <th>Change</th>
+            </tr>
+          </thead>
+          <tbody id="wow-table-body">
+            <tr><td>Total Contacts</td><td>120</td><td>77</td><td><span class="badge badge-red">&#9660; 36%</span></td></tr>
+            <tr><td>Valid Leads</td><td>17</td><td>9</td><td><span class="badge badge-red">&#9660; 47%</span></td></tr>
+            <tr><td>Valid Rate</td><td>14.2%</td><td>11.7%</td><td><span class="badge badge-yellow">&#9660; 2.5pp</span></td></tr>
+            <tr><td>Connected</td><td>2</td><td>2</td><td><span class="badge badge-yellow">&#61; Flat</span></td></tr>
+            <tr><td>Valid&rarr;Connected Rate</td><td>11.8%</td><td>22.2%</td><td><span class="badge badge-green">&#9650; +88%</span></td></tr>
+            <tr><td>Outbound Volume</td><td>93</td><td>41</td><td><span class="badge badge-yellow">&#9660; 56%</span></td></tr>
+            <tr><td>Deals Created</td><td>13</td><td>27</td><td><span class="badge badge-green">&#9650; +108%</span></td></tr>
+            <tr><td>BD Pipeline Deals</td><td>2</td><td>4</td><td><span class="badge badge-green">&#9650; +100%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: FUNNEL PERFORMANCE ===== -->
+    <div class="page" id="page-funnel">
+      <div class="section-title">Funnel Performance</div>
+      <div class="section-sub" id="funnel-sub">Contact &rarr; Valid &rarr; Connected &rarr; Deal &middot; Week 17</div>
+
+      <!-- FUNNEL VISUAL -->
+      <div class="funnel-wrap" id="funnel-visual">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- BOTTLENECK -->
+      <div class="bottleneck-card" id="bottleneck-card">
+        <h3>&#9888; Bottleneck Identified: Contact &rarr; Valid (Stage 1)</h3>
+        <p id="bottleneck-text">
+          <strong>88.3% of contacts created this week never become valid leads.</strong>
+          Of 77 contacts, only 9 passed the validity check. The primary drivers are spam
+          (17 contacts, 22.1%) from the <em>Popup&nbsp;&ndash;&nbsp;Blacklist&nbsp;Countries</em> source,
+          jobseekers (8 contacts, 10.4%), and unqualified entries (37 contacts, 48.1%).
+          This is where BD capacity is most wasted &mdash; the funnel needs to be
+          cleaned at the top before downstream conversion rates matter.
+        </p>
+      </div>
+
+      <!-- CONVERSION RATES TABLE -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Funnel Conversion Rates</h3>
+          <span class="badge badge-blue" id="funnel-week-badge">W17</span>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Stage Transition</th><th>From</th><th>To</th><th>Rate</th><th>W16</th><th>Trend</th></tr>
+          </thead>
+          <tbody id="funnel-table-body">
+            <tr>
+              <td><strong>Contact &rarr; Valid</strong></td>
+              <td id="ft-c">77</td><td id="ft-v">9</td>
+              <td style="color:var(--red);font-weight:700" id="ft-cv">11.7%</td>
+              <td style="color:var(--muted)">14.2%</td>
+              <td><span class="badge badge-red">&#9660; 2.5pp</span></td>
+            </tr>
+            <tr>
+              <td><strong>Valid &rarr; Connected</strong></td>
+              <td id="ft-v2">9</td><td id="ft-conn">2</td>
+              <td style="color:var(--yellow);font-weight:700" id="ft-vc">22.2%</td>
+              <td style="color:var(--muted)">11.8%</td>
+              <td><span class="badge badge-green">&#9650; +88%</span></td>
+            </tr>
+            <tr>
+              <td><strong>Connected &rarr; Deal</strong></td>
+              <td id="ft-conn2">2</td><td id="ft-d">—</td>
+              <td style="color:var(--muted);font-weight:700">Ongoing</td>
+              <td style="color:var(--muted)">—</td>
+              <td><span class="badge badge-muted">Tracking</span></td>
+            </tr>
+            <tr>
+              <td><strong>Overall Contact &rarr; Connected</strong></td>
+              <td id="ft-tot">77</td><td id="ft-conn3">2</td>
+              <td style="color:var(--muted);font-weight:700" id="ft-oc">2.6%</td>
+              <td style="color:var(--muted)">1.7%</td>
+              <td><span class="badge badge-green">&#9650; +53%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- FUNNEL COMPARISON CHART -->
+      <div class="chart-card" style="margin-bottom:28px">
+        <h3>Funnel Comparison &mdash; W16 vs W17</h3>
+        <canvas id="funnelCompChart" style="max-height:240px"></canvas>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: LEAD SOURCE ANALYSIS ===== -->
+    <div class="page" id="page-sources">
+      <div class="section-title">Lead Source Analysis</div>
+      <div class="section-sub" id="sources-sub">SP vs Outbound vs Inbound &middot; Quality by source &middot; Week 17</div>
+
+      <!-- SOURCE TABLE -->
+      <div class="table-card" style="margin-bottom:28px">
+        <div class="table-header">
+          <h3>Source Performance</h3>
+          <span class="badge badge-blue" id="sources-week-badge">W17 &middot; 77 Total</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Volume</th>
+              <th>Share</th>
+              <th>Valid</th>
+              <th>Valid %</th>
+              <th>Connected</th>
+              <th>Connect %</th>
+              <th>Quality</th>
+            </tr>
+          </thead>
+          <tbody id="sources-table-body">
+            <tr>
+              <td><strong>Inbound (BD Lead)</strong></td>
+              <td id="src-ib-vol">35</td>
+              <td id="src-ib-share">45.5%</td>
+              <td id="src-ib-valid">4</td>
+              <td id="src-ib-valid-pct" style="color:var(--cyan);font-weight:700">11.4%</td>
+              <td id="src-ib-conn">2</td>
+              <td id="src-ib-conn-pct" style="color:var(--green);font-weight:700">5.7%</td>
+              <td><span class="badge badge-green">Best</span></td>
+            </tr>
+            <tr>
+              <td><strong>Outbound (OA Outbound)</strong></td>
+              <td id="src-ob-vol">41</td>
+              <td id="src-ob-share">53.2%</td>
+              <td id="src-ob-valid">5</td>
+              <td id="src-ob-valid-pct" style="color:var(--yellow);font-weight:700">12.2%</td>
+              <td id="src-ob-conn">0</td>
+              <td id="src-ob-conn-pct" style="color:var(--red);font-weight:700">0%</td>
+              <td><span class="badge badge-red">No Connects</span></td>
+            </tr>
+            <tr>
+              <td><strong>Source Partner (SP)</strong></td>
+              <td id="src-sp-vol">0</td>
+              <td>0%</td>
+              <td>0</td>
+              <td style="color:var(--muted)">—</td>
+              <td>0</td>
+              <td style="color:var(--muted)">—</td>
+              <td><span class="badge badge-muted">No data</span></td>
+            </tr>
+            <tr>
+              <td><strong>Other / Mixed</strong></td>
+              <td>1</td>
+              <td>1.3%</td>
+              <td>0</td>
+              <td style="color:var(--muted)">0%</td>
+              <td>0</td>
+              <td style="color:var(--muted)">0%</td>
+              <td><span class="badge badge-muted">Mixed</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SOURCE CHARTS -->
+      <div class="two-col">
+        <div class="chart-card">
+          <h3>Volume by Source</h3>
+          <canvas id="sourceVolChart" style="max-height:200px"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Connect Rate by Source</h3>
+          <canvas id="sourceQualChart" style="max-height:200px"></canvas>
+        </div>
+      </div>
+
+      <!-- SOURCE WoW -->
+      <div class="table-card">
+        <div class="table-header"><h3>Source Mix &mdash; Week-over-Week</h3></div>
+        <table>
+          <thead><tr><th>Source</th><th>W16 Volume</th><th>W17 Volume</th><th>W16 Valid%</th><th>W17 Valid%</th><th>W16 Connect%</th><th>W17 Connect%</th></tr></thead>
+          <tbody id="sources-wow-body">
+            <tr>
+              <td><strong>Inbound</strong></td>
+              <td>26</td><td>35</td>
+              <td>11.5%</td><td style="color:var(--cyan)">11.4%</td>
+              <td>7.7%</td><td style="color:var(--green)">5.7%</td>
+            </tr>
+            <tr>
+              <td><strong>Outbound</strong></td>
+              <td>93</td><td>41</td>
+              <td>15.1%</td><td style="color:var(--yellow)">12.2%</td>
+              <td>0%</td><td style="color:var(--red)">0%</td>
+            </tr>
+            <tr>
+              <td><strong>SP</strong></td>
+              <td>1</td><td>0</td>
+              <td style="color:var(--green)">100%</td><td style="color:var(--muted)">—</td>
+              <td style="color:var(--green)">100%</td><td style="color:var(--muted)">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: LEAD QUALITY INSIGHTS ===== -->
+    <div class="page" id="page-quality">
+      <div class="section-title">Lead Quality Insights</div>
+      <div class="section-sub" id="quality-sub">What&apos;s performing, what&apos;s not, and anomalies &middot; Week 17</div>
+
+      <!-- PERFORMING / UNDERPERFORMING -->
+      <div class="insight-row">
+        <div class="insight-card">
+          <h4 class="good">&#9650; Best Performing</h4>
+          <div class="insight-item"><strong>Inbound BD leads</strong> &mdash; 100% of this week&rsquo;s connected leads came from inbound, despite being only 45% of volume. Connect rate 5.7% vs 0% outbound.</div>
+          <div class="insight-item"><strong>Valid&rarr;Connected rate</strong> &mdash; Improved from 11.8% (W16) to 22.2% (W17). The quality of follow-up on valid leads is getting better.</div>
+          <div class="insight-item"><strong>Deal creation</strong> &mdash; 27 deals this week vs 13 last week (+108%). Both BD pipeline (4 deals) and CS pipeline (23 deals) saw growth.</div>
+        </div>
+        <div class="insight-card">
+          <h4 class="bad">&#9660; Underperforming</h4>
+          <div class="insight-item"><strong>Outbound (OA Outbound)</strong> &mdash; 41 contacts, 5 valid, <strong>0 connected</strong>. All 5 valid outbound leads responded as &ldquo;Not Interested&rdquo;. Zero pipeline contribution.</div>
+          <div class="insight-item"><strong>Overall contact quality</strong> &mdash; Only 11.7% valid rate. Nearly 9 in 10 leads created this week added no BD value.</div>
+          <div class="insight-item"><strong>SP leads absent</strong> &mdash; No SP-tagged leads this week. W16 had 1 SP lead that connected (100% connect rate). SP channel appears inactive.</div>
+        </div>
+      </div>
+
+      <!-- ANOMALIES -->
+      <div class="insight-row">
+        <div class="insight-card">
+          <h4 class="warn">&#9888; Data Anomalies</h4>
+          <div class="insight-item"><strong>Spam surge</strong> &mdash; 17 out of 77 contacts (22.1%) flagged as spam. Primary source: <em>Popup &ndash; Blacklist Countries</em>. This source is generating high-volume junk and inflating contact counts.</div>
+          <div class="insight-item"><strong>Jobseeker bleed</strong> &mdash; 8 contacts (10.4%) are jobseekers from <em>Company Page Inquiry</em>. LinkedIn form needs tighter qualifying question.</div>
+          <div class="insight-item"><strong>Unscored contacts</strong> &mdash; 3 outbound contacts (James Travis, Nicholas Trueb, Alex Grechishkin) have no <em>lead_validity</em> set. These need manual review or auto-rule.</div>
+        </div>
+        <div class="insight-card">
+          <h4 style="color:var(--accent)">&#128269; Top Valid Leads This Week</h4>
+          <div class="insight-item" id="valid-leads-list">
+            <strong>Geneva MSAI</strong> (Medical Staff AI) &mdash; Valid &middot; BD Qualified &middot; Inbound<br>
+            <strong>Vivek Sadh</strong> (Jellyfish Technologies) &mdash; Valid &middot; BD Qualified &middot; Inbound<br>
+            <strong>Eddie Toth</strong> (PixelAscend) &mdash; Valid &middot; <span style="color:var(--green)">Connected &#10003;</span> &middot; Deal Created<br>
+            <strong>Usman Haider</strong> &mdash; Valid &middot; <span style="color:var(--green)">Connected &#10003;</span><br>
+            <em style="color:var(--muted);font-size:12px">+ 5 Valid-Not Interested (outbound)</em>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVALID BREAKDOWN CHART + TABLE -->
+      <div class="two-col">
+        <div class="chart-card">
+          <h3>Lead Disposition Breakdown</h3>
+          <canvas id="invalidChart" style="max-height:220px"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Invalidity by Type</h3>
+          <div class="progress-list" style="margin-top:8px" id="invalid-progress">
+            <div class="progress-item">
+              <div class="progress-label"><span>Unqualified</span><span id="ip-unq">37 (48.1%)</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:48.1%;background:linear-gradient(90deg,var(--muted),#64748b)"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-label"><span>Spam / DNCL</span><span id="ip-spam">17 (22.1%)</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:22.1%;background:linear-gradient(90deg,var(--red),#f97316)"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-label"><span>Jobseekers</span><span id="ip-js">8 (10.4%)</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:10.4%;background:linear-gradient(90deg,var(--orange),var(--yellow))"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-label"><span>Service Providers</span><span id="ip-sp">3 (3.9%)</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:3.9%;background:linear-gradient(90deg,var(--yellow),var(--cyan))"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-label"><span>Valid (all)</span><span id="ip-val">9 (11.7%)</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:11.7%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-label"><span>No Validity Set</span><span id="ip-none">3 (3.9%)</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:3.9%;background:linear-gradient(90deg,var(--border),var(--muted))"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: ACTION PLAN + PIPELINE NOTES ===== -->
+    <div class="page" id="page-actions">
+      <div class="section-title">Action Plan</div>
+      <div class="section-sub" id="actions-sub">3&ndash;5 specific actions based on W17 data &middot; Updated Apr 29, 2026</div>
+
+      <!-- ACTION CARDS -->
+      <div class="action-grid" id="action-grid">
+        <div class="action-card">
+          <div class="action-num fix">1</div>
+          <div class="action-body">
+            <div class="action-tag fix">&#128683; FIX</div>
+            <div class="action-title">Gate or disable the &ldquo;Popup &ndash; Blacklist Countries&rdquo; source</div>
+            <div class="action-desc">
+              17 of 77 contacts this week (22.1%) came in as spam through this source &mdash; the highest single waste category.
+              Either add a stricter country-block on the popup trigger, require a qualifying field before submission,
+              or redirect users from blacklisted countries to a &ldquo;coming soon&rdquo; page.
+              This alone could raise the valid rate from 11.7% to ~14%+ immediately.
+            </div>
+          </div>
+        </div>
+
+        <div class="action-card">
+          <div class="action-num stop">2</div>
+          <div class="action-body">
+            <div class="action-tag stop">&#9940; STOP / REDUCE</div>
+            <div class="action-title">Pull back on bulk outbound batches until targeting is improved</div>
+            <div class="action-desc">
+              Outbound generated 41 contacts, 5 valid leads, and <strong>zero connections</strong> this week.
+              Every outbound valid lead said &ldquo;Not Interested&rdquo;. Last week 93 outbound contacts produced the same
+              connect rate (0%). This is a volume play with no pipeline return. Pause bulk outbound,
+              audit the targeting list, and only resume with tighter ICP criteria (company size, industry, geography).
+            </div>
+          </div>
+        </div>
+
+        <div class="action-card">
+          <div class="action-num double">3</div>
+          <div class="action-body">
+            <div class="action-tag double">&#9650; DOUBLE DOWN</div>
+            <div class="action-title">Fast-track Geneva MSAI and Vivek Sadh &mdash; both are Valid + BD Qualified</div>
+            <div class="action-desc">
+              Two inbound leads created this week are Valid and have a &ldquo;BD Qualified&rdquo; status but are not yet
+              Connected. <strong>Geneva MSAI</strong> (Medical Staff AI, Apr 28) and <strong>Vivek Sadh</strong>
+              (Jellyfish Technologies, Apr 27) should be contacted today. Inbound valid leads that aren&rsquo;t followed up
+              within 48 hours typically go cold &mdash; both are in the window right now.
+            </div>
+          </div>
+        </div>
+
+        <div class="action-card">
+          <div class="action-num improve">4</div>
+          <div class="action-body">
+            <div class="action-tag improve">&#128295; IMPROVE</div>
+            <div class="action-title">Add a jobseeker filter to the Company Page Inquiry form</div>
+            <div class="action-desc">
+              8 jobseekers (10.4% of leads) entered through <em>Company Page Inquiry</em> this week.
+              Add a single qualifying question to the LinkedIn / contact page form:
+              &ldquo;Are you looking to hire outsourced staff, or are you looking for a job?&rdquo;
+              Route the latter to a careers page. This is a cheap fix that removes a recurring noise source.
+            </div>
+          </div>
+        </div>
+
+        <div class="action-card">
+          <div class="action-num track">5</div>
+          <div class="action-body">
+            <div class="action-tag track">&#128203; TRACK</div>
+            <div class="action-title">Reactivate SP channel &mdash; it had a 100% connect rate in W16</div>
+            <div class="action-desc">
+              W16 had 1 SP-tagged lead (Daniel Coal) with <em>Valid</em> + <em>Connected</em> status
+              &mdash; 100% connect rate. W17 had zero SP leads. This is either a tracking gap or
+              a channel that&rsquo;s gone quiet. Confirm with the SP team whether the source is active,
+              and if so, why no BD-tagged leads came through this week. SP leads are the highest-quality
+              leads in the data; this channel should be prioritized.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PIPELINE NOTES -->
+      <div class="section-title" style="font-size:18px;margin-top:8px;margin-bottom:4px">Pipeline Notes</div>
+      <div class="section-sub">Patterns, early indicators, and context &middot; Week 17</div>
+
+      <div class="note-list" id="pipeline-notes">
+        <div class="note-item">
+          <div class="note-dot" style="background:var(--green)"></div>
+          <div class="note-text">
+            <strong>PixelAscend deal created from BD lead (Eddie Toth, Apr 23)</strong> &mdash;
+            7-day cycle from contact creation to deal. This is the fastest funnel completion this period
+            and matches the profile of a strong inbound lead: Valid validity, direct connection made,
+            deal opened as &ldquo;Sales Closer&rdquo; role. Replicate this intake pattern.
+          </div>
+        </div>
+        <div class="note-item">
+          <div class="note-dot" style="background:var(--accent)"></div>
+          <div class="note-text">
+            <strong>27 total deals created this week</strong> &mdash; 4 in the BD pipeline
+            (PixelAscend, cubexuk.com, Vista Film, DC Center LLC) and 23 in Client Services.
+            CS pipeline deal flow more than doubled vs W16. This may reflect improved qualifying
+            by the CS team or a backlog of SP companies being onboarded.
+          </div>
+        </div>
+        <div class="note-item">
+          <div class="note-dot" style="background:var(--yellow)"></div>
+          <div class="note-text">
+            <strong>W16 deal count anomaly</strong> &mdash; Prior week showed 176 total deals,
+            but ~163 were a bulk SP directory import created on Apr 16&ndash;17 (all in early/holding stage).
+            The W16 comparison baseline used in this report is 13 normal deals, not 176.
+            This import should be reviewed to ensure these companies are being actively worked,
+            not just added as database entries.
+          </div>
+        </div>
+        <div class="note-item">
+          <div class="note-dot" style="background:var(--cyan)"></div>
+          <div class="note-text">
+            <strong>Early indicator &mdash; Inbound quality is consistent</strong> &mdash;
+            Both W16 and W17 produced exactly 2 connected leads from inbound sources, despite W17 having
+            more inbound volume (35 vs 26). Valid&rarr;Connected rate improved (22.2% vs 11.8%).
+            Inbound is the stable engine; outbound is noise at current targeting quality.
+          </div>
+        </div>
+        <div class="note-item">
+          <div class="note-dot" style="background:var(--red)"></div>
+          <div class="note-text">
+            <strong>Risk &mdash; 3 unscored outbound contacts</strong> &mdash;
+            James Travis (Singletrack), Nicholas Trueb, and Alex Grechishkin (Bricklane.com) have no
+            lead_validity set in HubSpot despite being created Apr 22&ndash;27. All are tagged
+            &ldquo;BD Lead;OA Outbound.&rdquo; These need manual review or an automated validity rule
+            to avoid gaps in funnel reporting.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ============================================================
+     DATA + SCRIPT
+============================================================ -->
+<script id="report-data" type="application/json">
+{
+  "meta": {
+    "lastUpdated": "2026-04-29",
+    "cycle": "Tuesday-Monday",
+    "category": "OA Business Development",
+    "hubspotPortal": "44390857"
+  },
+  "weeks": {
+    "16": {
+      "label": "W16", "dates": "Apr 15–21", "year": 2026,
+      "startDate": "2026-04-15", "endDate": "2026-04-21",
+      "contacts": 120, "valid": 17, "validStrict": 2, "validNI": 15,
+      "connected": 2, "qualified": 15, "deals": 13, "dealsAll": 176,
+      "spam": 14, "jobseekers": 5, "serviceProviders": 4, "unqualified": 80, "noValidity": 0,
+      "inbound": 26, "outbound": 93, "sp": 1, "other": 0,
+      "inboundValid": 3, "inboundConnected": 2,
+      "outboundValid": 14, "outboundConnected": 0,
+      "spValid": 1, "spConnected": 1
+    },
+    "17": {
+      "label": "W17", "dates": "Apr 22–28", "year": 2026,
+      "startDate": "2026-04-22", "endDate": "2026-04-28",
+      "contacts": 77, "valid": 9, "validStrict": 4, "validNI": 5,
+      "connected": 2, "qualified": 7, "deals": 27, "dealsAll": 27,
+      "spam": 17, "jobseekers": 8, "serviceProviders": 3, "unqualified": 37, "noValidity": 3,
+      "inbound": 35, "outbound": 41, "sp": 0, "other": 1,
+      "inboundValid": 4, "inboundConnected": 2,
+      "outboundValid": 5, "outboundConnected": 0,
+      "spValid": 0, "spConnected": 0
+    }
+  }
+}
+</script>
+
+<script>
+/* ── DATA ── */
+var REPORT = JSON.parse(document.getElementById('report-data').textContent);
+var currentWeek = 17;
+var charts = {};
+
+/* ── FRESHNESS CHECK ── */
+(function() {
+  var lastUpdated = new Date(REPORT.meta.lastUpdated);
+  var today = new Date();
+  var diffDays = Math.floor((today - lastUpdated) / 86400000);
+  var badge = document.getElementById('freshnessbage') || document.getElementById('freshnessbage');
+  // find badge
+  var b = document.querySelector('.fresh-badge, .stale-badge');
+  if (b) {
+    if (diffDays <= 7) {
+      b.className = 'fresh-badge';
+      b.innerHTML = '&#9679; LIVE DATA';
+    } else {
+      b.className = 'stale-badge';
+      b.innerHTML = '&#9651; STALE &mdash; ' + diffDays + ' days old';
+    }
+  }
+  // Next update: next Tuesday
+  var next = new Date(lastUpdated);
+  next.setDate(next.getDate() + 7);
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var lbl = document.getElementById('nextUpdateLabel');
+  if (lbl) lbl.textContent = 'Next update: ' + months[next.getMonth()] + ' ' + next.getDate() + ', ' + next.getFullYear();
+})();
+
+/* ── NAVIGATION ── */
+function switchPage(id, el) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  document.getElementById('page-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+/* ── WEEK SELECT ── */
+function selectWeek(wk, el) {
+  currentWeek = wk;
+  document.querySelectorAll('.week-tab[data-week]').forEach(function(t) { t.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  renderWeek(wk);
+}
+
+function pct(num, den) {
+  if (!den) return '0%';
+  return (num / den * 100).toFixed(1) + '%';
+}
+function delta(curr, prev) {
+  if (!prev) return '—';
+  var d = ((curr - prev) / prev * 100).toFixed(0);
+  return (d >= 0 ? '+' : '') + d + '%';
+}
+function setEl(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+function setHTML(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.innerHTML = val;
+}
+
+function renderWeek(wk) {
+  var d = REPORT.weeks[wk];
+  var prev = REPORT.weeks[wk - 1];
+  if (!d) return;
+
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var sd = new Date(d.startDate), ed = new Date(d.endDate);
+  var dateRange = months[sd.getMonth()] + ' ' + sd.getDate() + '–' + ed.getDate() + ', ' + d.year;
+
+  /* Header */
+  setEl('currentWeekLabel', d.label + ' · ' + d.dates + ', ' + d.year);
+  setHTML('summary-sub',  'OA Business Development &middot; ' + d.label + ' &middot; ' + d.dates + ', ' + d.year);
+  setHTML('funnel-sub',   'Contact &rarr; Valid &rarr; Connected &rarr; Deal &middot; ' + d.label);
+  setHTML('sources-sub',  'SP vs Outbound vs Inbound &middot; Quality by source &middot; ' + d.label);
+  setHTML('quality-sub',  'What&apos;s performing, what&apos;s not &middot; ' + d.label);
+  setHTML('actions-sub',  'Actions based on ' + d.label + ' data &middot; Updated ' + REPORT.meta.lastUpdated);
+
+  /* Sidebar */
+  setEl('sb-contacts', d.contacts);
+  setEl('sb-valid', d.valid);
+  setEl('sb-connected', d.connected);
+  setEl('sb-deals', d.deals);
+  setEl('sb-valid-pct', pct(d.valid, d.contacts));
+
+  /* KPI cards */
+  setEl('kpi-contacts', d.contacts);
+  setEl('kpi-valid', d.valid);
+  setEl('kpi-connected', d.connected);
+  setEl('kpi-deals', d.deals);
+  setHTML('kpi-valid-sub', d.validStrict + ' Valid &middot; ' + d.validNI + ' Valid-NI');
+  setHTML('kpi-deals-sub', '4 BD &middot; ' + (d.deals - 4) + ' CS pipeline');
+  setHTML('kpi-connected-sub', pct(d.connected, d.valid) + ' of valid leads');
+
+  if (prev) {
+    var cDelta = delta(d.contacts, prev.contacts);
+    var vDelta = delta(d.valid, prev.valid);
+    var connDelta = d.connected === prev.connected ? 'Flat' : delta(d.connected, prev.connected);
+    var dealDelta = delta(d.deals, prev.deals);
+    setHTML('kpi-contacts-delta', (d.contacts < prev.contacts ? '&#9660; ' : '&#9650; ') + Math.abs(d.contacts - prev.contacts) + '% vs ' + prev.label + ' (' + prev.contacts + ')');
+    setHTML('kpi-valid-delta', (d.valid < prev.valid ? '&#9660; ' : '&#9650; ') + Math.abs(parseFloat(vDelta)) + '% vs ' + prev.label + ' (' + prev.valid + ')');
+    setHTML('kpi-connected-delta', connDelta === 'Flat' ? '&#61; Flat vs ' + prev.label : connDelta + ' vs ' + prev.label);
+    setHTML('kpi-deals-delta', (d.deals > prev.deals ? '&#9650; ' : '&#9660; ') + dealDelta + ' vs ' + prev.label + ' (' + prev.deals + ')');
+  }
+
+  /* Funnel visual */
+  renderFunnel(d);
+
+  /* Funnel table */
+  setEl('ft-c', d.contacts);
+  setEl('ft-v', d.valid);
+  setEl('ft-v2', d.valid);
+  setEl('ft-conn', d.connected);
+  setEl('ft-conn2', d.connected);
+  setEl('ft-tot', d.contacts);
+  setEl('ft-conn3', d.connected);
+  setEl('ft-cv', pct(d.valid, d.contacts));
+  setEl('ft-vc', pct(d.connected, d.valid));
+  setEl('ft-oc', pct(d.connected, d.contacts));
+  setEl('funnel-week-badge', d.label);
+  setEl('sources-week-badge', d.label + ' · ' + d.contacts + ' Total');
+
+  /* Source table */
+  setEl('src-ib-vol', d.inbound);
+  setEl('src-ib-share', pct(d.inbound, d.contacts));
+  setEl('src-ib-valid', d.inboundValid);
+  setEl('src-ib-valid-pct', pct(d.inboundValid, d.inbound));
+  setEl('src-ib-conn', d.inboundConnected);
+  setEl('src-ib-conn-pct', pct(d.inboundConnected, d.inbound));
+  setEl('src-ob-vol', d.outbound);
+  setEl('src-ob-share', pct(d.outbound, d.contacts));
+  setEl('src-ob-valid', d.outboundValid);
+  setEl('src-ob-valid-pct', pct(d.outboundValid, d.outbound));
+  setEl('src-ob-conn', d.outboundConnected);
+  setEl('src-ob-conn-pct', pct(d.outboundConnected, d.outbound));
+  setEl('src-sp-vol', d.sp);
+
+  /* Quality page */
+  var ipUnq  = d.unqualified || 0;
+  var ipSpam = d.spam || 0;
+  var ipJs   = d.jobseekers || 0;
+  var ipSp   = d.serviceProviders || 0;
+  var ipNone = d.noValidity || 0;
+  setEl('ip-unq',  ipUnq  + ' (' + pct(ipUnq,  d.contacts) + ')');
+  setEl('ip-spam', ipSpam + ' (' + pct(ipSpam, d.contacts) + ')');
+  setEl('ip-js',   ipJs   + ' (' + pct(ipJs,   d.contacts) + ')');
+  setEl('ip-sp',   ipSp   + ' (' + pct(ipSp,   d.contacts) + ')');
+  setEl('ip-val',  d.valid + ' (' + pct(d.valid, d.contacts) + ')');
+  setEl('ip-none', ipNone + ' (' + pct(ipNone, d.contacts) + ')');
+
+  /* Bottleneck */
+  var lostPct = ((1 - d.valid / d.contacts) * 100).toFixed(1);
+  setHTML('bottleneck-text',
+    '<strong>' + lostPct + '% of contacts created this week never become valid leads.</strong> ' +
+    'Of ' + d.contacts + ' contacts, only ' + d.valid + ' passed validity. Primary drivers: spam (' +
+    d.spam + ' contacts, ' + pct(d.spam, d.contacts) + ') from the <em>Popup&nbsp;&ndash;&nbsp;Blacklist&nbsp;Countries</em> source, ' +
+    'jobseekers (' + d.jobseekers + ', ' + pct(d.jobseekers, d.contacts) + '), ' +
+    'and unqualified entries (' + d.unqualified + ', ' + pct(d.unqualified, d.contacts) + '). ' +
+    'Clean the top of the funnel before optimising downstream.'
+  );
+
+  /* Update charts */
+  updateCharts(wk);
+}
+
+/* ── FUNNEL RENDERER ── */
+function renderFunnel(d) {
+  var wrap = document.getElementById('funnel-visual');
+  if (!wrap) return;
+  var stages = [
+    { label: 'Contacts Created', count: d.contacts, color: '#4f6ef7', pct: 100 },
+    { label: 'Valid Leads',       count: d.valid,    color: '#06b6d4', pct: Math.round(d.valid / d.contacts * 100) },
+    { label: 'Connected',         count: d.connected,color: '#22c55e', pct: Math.round(d.connected / d.contacts * 100) },
+    { label: 'Deals Created',     count: d.deals,    color: '#7c3aed', pct: null }
+  ];
+  var labels = ['', pct(d.valid, d.contacts) + ' of contacts', pct(d.connected, d.valid) + ' of valid', 'All pipelines'];
+  var html = '';
+  stages.forEach(function(s, i) {
+    var width = s.pct !== null ? Math.max(s.pct, 12) : 35;
+    html += '<div class="funnel-stage" style="margin-bottom:8px">';
+    html += '<div class="funnel-bar-wrap">';
+    html += '<div class="funnel-bar" style="background:' + s.color + ';width:' + width + '%;opacity:0.9">';
+    html += '<span class="funnel-bar-label">' + s.label + '</span>';
+    html += '<span class="funnel-bar-count">' + s.count + '</span>';
+    html += '</div></div>';
+    html += '<div class="funnel-aside" style="color:var(--muted);font-size:12px">' + labels[i] + '</div>';
+    html += '</div>';
+    if (i < stages.length - 1) {
+      var convPct = i === 0 ? pct(d.valid, d.contacts) : i === 1 ? pct(d.connected, d.valid) : '—';
+      html += '<div style="display:flex;align-items:center;margin-bottom:4px;padding-left:12px">';
+      html += '<span style="font-size:18px;color:var(--muted)">&#8595;</span>';
+      html += '<span style="font-size:11px;color:var(--muted);margin-left:8px">conversion: <strong style="color:var(--text)">' + convPct + '</strong></span>';
+      html += '</div>';
+    }
+  });
+  wrap.innerHTML = html;
+}
+
+/* ── CHART BUILDERS ── */
+var FONT = { family: "'Segoe UI', system-ui, sans-serif", size: 12 };
+var GRID = 'rgba(46,50,72,0.8)';
+
+function buildCharts() {
+  /* Trend Chart */
+  var d16 = REPORT.weeks[16], d17 = REPORT.weeks[17];
+  charts.trend = new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+      labels: ['W16', 'W17'],
+      datasets: [
+        { label: 'Contacts', data: [d16.contacts, d17.contacts], borderColor: '#4f6ef7', backgroundColor: 'rgba(79,110,247,.08)', tension: .4, fill: true, pointBackgroundColor: '#4f6ef7' },
+        { label: 'Valid',    data: [d16.valid,    d17.valid],    borderColor: '#06b6d4', backgroundColor: 'rgba(6,182,212,.08)',  tension: .4, fill: true, pointBackgroundColor: '#06b6d4' },
+        { label: 'Connected',data: [d16.connected,d17.connected],borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,.08)', tension: .4, fill: true, pointBackgroundColor: '#22c55e' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { labels: { color: '#8892a4', font: FONT, boxWidth: 12 } } },
+      scales: {
+        x: { grid: { color: GRID }, ticks: { color: '#8892a4', font: FONT } },
+        y: { grid: { color: GRID }, ticks: { color: '#8892a4', font: FONT } }
+      }
+    }
+  });
+
+  /* Disposition (donut) */
+  var dw = REPORT.weeks[currentWeek];
+  charts.disposition = new Chart(document.getElementById('dispositionChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Valid', 'Spam', 'Jobseeker', 'Svc Provider', 'Unqualified', 'No Score'],
+      datasets: [{ data: [dw.valid, dw.spam, dw.jobseekers, dw.serviceProviders, dw.unqualified, dw.noValidity],
+        backgroundColor: ['#22c55e','#ef4444','#f97316','#f59e0b','#8892a4','#2e3248'],
+        borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true, cutout: '65%',
+      plugins: { legend: { position: 'bottom', labels: { color: '#8892a4', font: FONT, boxWidth: 10, padding: 8 } } }
+    }
+  });
+
+  /* Funnel Comparison Bar */
+  charts.funnelComp = new Chart(document.getElementById('funnelCompChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Contacts', 'Valid', 'Connected', 'Deals'],
+      datasets: [
+        { label: 'W16', data: [d16.contacts, d16.valid, d16.connected, d16.deals], backgroundColor: 'rgba(79,110,247,.5)', borderRadius: 4 },
+        { label: 'W17', data: [d17.contacts, d17.valid, d17.connected, d17.deals], backgroundColor: 'rgba(34,197,94,.7)',  borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { labels: { color: '#8892a4', font: FONT, boxWidth: 12 } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#8892a4', font: FONT } },
+        y: { grid: { color: GRID },    ticks: { color: '#8892a4', font: FONT } }
+      }
+    }
+  });
+
+  /* Source Volume Bar */
+  charts.sourceVol = new Chart(document.getElementById('sourceVolChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Inbound', 'Outbound', 'SP', 'Other'],
+      datasets: [{ label: 'Contacts', data: [dw.inbound, dw.outbound, dw.sp, dw.other],
+        backgroundColor: ['#4f6ef7','#f59e0b','#22c55e','#8892a4'], borderRadius: 5, borderSkipped: false }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#8892a4', font: FONT } },
+        y: { grid: { color: GRID },    ticks: { color: '#8892a4', font: FONT } }
+      }
+    }
+  });
+
+  /* Source Quality Bar */
+  charts.sourceQual = new Chart(document.getElementById('sourceQualChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Inbound', 'Outbound', 'SP'],
+      datasets: [
+        { label: 'Valid %',   data: [parseFloat(pct(dw.inboundValid, dw.inbound)), parseFloat(pct(dw.outboundValid, dw.outbound)), dw.sp ? parseFloat(pct(dw.spValid, dw.sp)) : 0], backgroundColor: 'rgba(6,182,212,.7)', borderRadius: 4 },
+        { label: 'Connect %', data: [parseFloat(pct(dw.inboundConnected, dw.inbound)), parseFloat(pct(dw.outboundConnected, dw.outbound)), dw.sp ? parseFloat(pct(dw.spConnected, dw.sp)) : 0], backgroundColor: 'rgba(34,197,94,.7)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { labels: { color: '#8892a4', font: FONT, boxWidth: 12 } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#8892a4', font: FONT } },
+        y: { grid: { color: GRID },    ticks: { color: '#8892a4', font: FONT }, max: 20 }
+      }
+    }
+  });
+
+  /* Invalid Donut (quality page) */
+  charts.invalid = new Chart(document.getElementById('invalidChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Unqualified', 'Spam/DNCL', 'Jobseekers', 'Svc Provider', 'Valid', 'No Score'],
+      datasets: [{ data: [dw.unqualified, dw.spam, dw.jobseekers, dw.serviceProviders, dw.valid, dw.noValidity],
+        backgroundColor: ['#64748b','#ef4444','#f97316','#f59e0b','#22c55e','#2e3248'],
+        borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true, cutout: '60%',
+      plugins: { legend: { position: 'bottom', labels: { color: '#8892a4', font: FONT, boxWidth: 10, padding: 6 } } }
+    }
+  });
+}
+
+function updateCharts(wk) {
+  var dw = REPORT.weeks[wk];
+  if (!dw) return;
+
+  /* Disposition */
+  if (charts.disposition) {
+    charts.disposition.data.datasets[0].data = [dw.valid, dw.spam, dw.jobseekers, dw.serviceProviders, dw.unqualified, dw.noValidity];
+    charts.disposition.update();
+  }
+  /* Source vol */
+  if (charts.sourceVol) {
+    charts.sourceVol.data.datasets[0].data = [dw.inbound, dw.outbound, dw.sp, dw.other];
+    charts.sourceVol.update();
+  }
+  /* Source qual */
+  if (charts.sourceQual) {
+    charts.sourceQual.data.datasets[0].data = [parseFloat(pct(dw.inboundValid, dw.inbound)), parseFloat(pct(dw.outboundValid, dw.outbound)), 0];
+    charts.sourceQual.data.datasets[1].data = [parseFloat(pct(dw.inboundConnected, dw.inbound)), parseFloat(pct(dw.outboundConnected, dw.outbound)), 0];
+    charts.sourceQual.update();
+  }
+  /* Invalid */
+  if (charts.invalid) {
+    charts.invalid.data.datasets[0].data = [dw.unqualified, dw.spam, dw.jobseekers, dw.serviceProviders, dw.valid, dw.noValidity];
+    charts.invalid.update();
+  }
+  /* Trend — keep static for now */
+}
+
+/* ── EXPORT ── */
+function exportReport() {
+  var d = REPORT.weeks[currentWeek];
+  var label = d ? d.label : 'W' + currentWeek;
+  var blob = new Blob([document.documentElement.outerHTML], { type: 'text/html' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'OA-BD-Report-' + label + '-' + REPORT.meta.lastUpdated + '.html';
+  a.click();
+}
+
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded', function() {
+  buildCharts();
+  renderWeek(currentWeek);
+});
+</script>
+
+</body>
+</html>
