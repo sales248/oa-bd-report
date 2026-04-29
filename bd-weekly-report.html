@@ -291,6 +291,59 @@
     .note-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
     .note-text { font-size: 13px; color: var(--text); line-height: 1.5; }
 
+    /* TOP 10 OUTREACH */
+    .outreach-legend {
+      display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;
+      padding: 12px 16px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius);
+    }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+    .tier-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 99px;
+      font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+    }
+    .tier-close   { background: rgba(34,197,94,.15);  color: var(--green); }
+    .tier-advance { background: rgba(79,110,247,.15); color: var(--accent); }
+    .tier-qualify { background: rgba(245,158,11,.15); color: var(--yellow); }
+    .outreach-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+    .outreach-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+      display: flex; gap: 16px; align-items: flex-start;
+      transition: border-color .15s;
+    }
+    .outreach-card:hover { border-color: rgba(79,110,247,.4); }
+    .rank-badge {
+      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+      background: var(--surface2); border: 1px solid var(--border);
+      display: grid; place-items: center;
+      font-size: 16px; font-weight: 800; color: var(--accent);
+    }
+    .outreach-body { flex: 1; min-width: 0; }
+    .outreach-top { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+    .outreach-name { font-size: 15px; font-weight: 700; }
+    .deal-dot { font-size: 11px; font-weight: 700; color: var(--green); }
+    .outreach-meta { font-size: 12.5px; color: var(--muted); margin-bottom: 6px; }
+    .outreach-contact { font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+    .outreach-why { font-size: 13px; color: var(--text); margin-bottom: 4px; line-height: 1.55; }
+    .outreach-action {
+      font-size: 13px; color: var(--text); margin-bottom: 10px; line-height: 1.55;
+      padding: 8px 12px; background: rgba(79,110,247,.06);
+      border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0;
+    }
+    .hs-link {
+      display: inline-block; font-size: 11.5px; font-weight: 600;
+      color: var(--accent); text-decoration: none;
+      padding: 4px 10px; border: 1px solid rgba(79,110,247,.3);
+      border-radius: 6px; transition: all .15s;
+    }
+    .hs-link:hover { background: rgba(79,110,247,.1); }
+    .outreach-no-data {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 32px 20px;
+      text-align: center; color: var(--muted); font-size: 13.5px;
+    }
+
     /* RESPONSIVE */
     @media (max-width: 900px) {
       .chart-row, .two-col, .three-col, .insight-row { grid-template-columns: 1fr; }
@@ -340,6 +393,9 @@
     </div>
     <div class="nav-item" onclick="switchPage('actions', this)">
       <span class="nav-icon">&#9889;</span> Action Plan
+    </div>
+    <div class="nav-item" onclick="switchPage('outreach', this)">
+      <span class="nav-icon">&#127919;</span> Top 10 Outreach
     </div>
     <hr class="sidebar-divider" />
     <div class="sidebar-label">This Week (W17)</div>
@@ -835,6 +891,24 @@
       </div>
     </div>
 
+    <!-- ===== PAGE: TOP 10 OUTREACH ===== -->
+    <div class="page" id="page-outreach">
+      <div class="section-title">Weekly Top 10: Accounts to Reach Out To</div>
+      <div class="section-sub" id="outreach-sub">Ranked by outreach priority &middot; OA Business Development &middot; Week 17</div>
+
+      <!-- TIER LEGEND -->
+      <div class="outreach-legend">
+        <div class="legend-item"><span class="tier-badge tier-close">CLOSE</span>Connected + active deal &mdash; follow up to convert</div>
+        <div class="legend-item"><span class="tier-badge tier-advance">ADVANCE</span>Connected &mdash; no deal yet &mdash; push to next stage</div>
+        <div class="legend-item"><span class="tier-badge tier-qualify">QUALIFY</span>Valid + BD-Qualified &mdash; schedule discovery call</div>
+      </div>
+
+      <!-- TOP 10 LIST (JS-rendered) -->
+      <div class="outreach-list" id="outreach-list">
+        <div class="outreach-no-data">Loading&hellip;</div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -870,7 +944,19 @@
       "inbound": 35, "outbound": 41, "sp": 0, "other": 1,
       "inboundValid": 4, "inboundConnected": 2,
       "outboundValid": 5, "outboundConnected": 0,
-      "spValid": 0, "spConnected": 0
+      "spValid": 0, "spConnected": 0,
+      "top10": [
+        { "rank":1,  "name":"Elicia Siew Hiang Chan", "title":"Senior Marketing Manager", "company":"Fujifilm",           "email":"elicia.chan.yh@fujifilm.com",        "phone":"+65 9687 4021",    "country":"Singapore",          "validity":"Valid", "status":"CONNECTED", "deals":1, "tier":"CLOSE",   "why":"Global Fortune 500 enterprise. Senior decision-maker already connected with an active deal in the pipeline — highest-value account this week.",                                                                        "action":"Follow up on the open deal — confirm hiring requirements, send proposal, or schedule a formal pitch meeting.", "hsId":"116520320039" },
+        { "rank":2,  "name":"Ana Dameska",            "title":"Head of People & Talent",  "company":"bizdev.ae",           "email":"adameska@bizdev.ae",                 "phone":"+389 070 365 506", "country":"North Macedonia",     "validity":"Valid", "status":"CONNECTED", "deals":1, "tier":"CLOSE",   "why":"Perfect ICP: Head of People & Talent Development at a business development firm. Already connected, deal created. These are exactly the decision-makers who buy outsourcing.",                                        "action":"Follow up on the open deal — ask about active hiring needs and expected close timeframe.",                     "hsId":"116581287953" },
+        { "rank":3,  "name":"Florian Zitz",           "title":"Finance",                  "company":"hiry.agency",          "email":"finance@hiry.agency",               "phone":"+43 0670 3542 124","country":"Austria",             "validity":"Valid", "status":"CONNECTED", "deals":1, "tier":"CLOSE",   "why":"Recruitment/staffing agency with an active deal. Agencies are high-LTV clients and can send recurring outsourcing volume. Finance contact = budget approver.",                                                          "action":"Advance deal to proposal stage — present agency outsourcing pricing and capacity model.",                     "hsId":"116322413656" },
+        { "rank":4,  "name":"Sara B",                 "title":"",                         "company":"BioX Systems",         "email":"sara@bioxsystems.com",              "phone":"+44 7906 279 152", "country":"United Kingdom",      "validity":"Valid", "status":"CONNECTED", "deals":1, "tier":"CLOSE",   "why":"Biotech/systems company with a confirmed active deal from Paid Social. Business email domain confirms legitimacy.",                                                                                                    "action":"Follow up on the open deal — confirm role requirements and send next steps.",                                  "hsId":"117432527741" },
+        { "rank":5,  "name":"Bryant Huang",           "title":"",                         "company":"Lucid Motors",         "email":"bryanthuang@lucidmotors.com",       "phone":"+1 510 365 1111",  "country":"United States",       "validity":"Valid", "status":"Feedback",  "deals":0, "tier":"QUALIFY", "why":"Lucid Motors is a premium EV brand with 3,000+ employees. Corporate email confirms he's a real employee. Fast-growing company with active hiring needs across engineering and operations.",                         "action":"Schedule discovery call — ask about current hiring challenges and volume of open roles.",                      "hsId":"116812468782" },
+        { "rank":6,  "name":"Sandip Patel",           "title":"Chief Executive Officer",  "company":"Keen Tel Engineering", "email":"sandip.patel@keentelengineering.com","phone":"+1 865 771 9190",  "country":"USA (Tampa, FL)",     "validity":"Valid", "status":"Feedback",  "deals":0, "tier":"QUALIFY", "why":"CEO at an engineering firm = direct decision-maker with full budget authority. Reached through Paid Social, indicating active intent. Engineering companies frequently need back-office and tech support outsourced.", "action":"CEO-level personalized outreach — lead with cost savings and time-to-hire metrics specific to engineering firms.", "hsId":"116760339351" },
+        { "rank":7,  "name":"Jonathon Martin",        "title":"Chief Operating Officer",  "company":"Duncan Solutions",     "email":"jmartin@duncansolutions.com.au",    "phone":"+61 407 660 736",  "country":"Australia (Sydney)",  "validity":"Valid", "status":"CONNECTED", "deals":0, "tier":"ADVANCE", "why":"COO at an Australian solutions company. Already connected but no deal created — this is a warm relationship waiting to be advanced. C-suite + business domain + AU market.",                                         "action":"Create a deal in HubSpot and send a formal capabilities overview with AUS client case studies.",               "hsId":"113790097325" },
+        { "rank":8,  "name":"Stephon Grey",           "title":"Managing Director",        "company":"CIFA Consulting",      "email":"stephon.grey@cifa-consulting.com",  "phone":"+1 868 301 3568",  "country":"Trinidad / Miami",    "validity":"Valid", "status":"Feedback",  "deals":0, "tier":"QUALIFY", "why":"Managing Director at a consulting firm. Consulting firms frequently need to scale support staff quickly. Miami city + Caribbean company domain = broad geographic reach.",                                             "action":"Discovery call — explore consulting staff support needs: admin, research, and project coordination roles.",    "hsId":"116220978569" },
+        { "rank":9,  "name":"Paul Newman",            "title":"Founder & CEO",            "company":"The DG Partner Group", "email":"paul@thedgpg.com",                  "phone":"+971 509 640 548", "country":"UK / UAE",            "validity":"Valid", "status":"CONNECTED", "deals":0, "tier":"ADVANCE", "why":"Founder/CEO at a digital growth agency with a UAE phone. Digital agencies are a natural fit for outsourced creative, marketing, and tech staff. Already connected — no deal yet.",                                  "action":"Create a deal and pitch digital marketing and tech role outsourcing tailored to agency workflow.",              "hsId":"116541873466" },
+        { "rank":10, "name":"Ann Hewitt",             "title":"Assistant Service Manager","company":"NHS",                  "email":"ahewitt1@nhs.net",                  "phone":"",                 "country":"United Kingdom",      "validity":"Valid", "status":"Feedback",  "deals":0, "tier":"QUALIFY", "why":"NHS is the UK's largest employer (1.3M staff). Even small NHS teams outsource admin and back-office work. The nhs.net domain is unambiguously legitimate. Very high LTV potential.",                                "action":"Email outreach (no phone available) — lead with healthcare admin and back-office support use cases.",           "hsId":"117548724879" }
+      ]
     }
   }
 }
@@ -957,6 +1043,7 @@ function renderWeek(wk) {
   setHTML('sources-sub',  'SP vs Outbound vs Inbound &middot; Quality by source &middot; ' + d.label);
   setHTML('quality-sub',  'What&apos;s performing, what&apos;s not &middot; ' + d.label);
   setHTML('actions-sub',  'Actions based on ' + d.label + ' data &middot; Updated ' + REPORT.meta.lastUpdated);
+  setHTML('outreach-sub', 'Ranked by outreach priority &middot; OA Business Development &middot; ' + d.label + ' &middot; ' + d.dates + ', ' + d.year);
 
   /* Sidebar */
   setEl('sb-contacts', d.contacts);
@@ -1043,6 +1130,9 @@ function renderWeek(wk) {
 
   /* Update charts */
   updateCharts(wk);
+
+  /* Top 10 outreach */
+  renderTop10(wk);
 }
 
 /* ── FUNNEL RENDERER ── */
@@ -1076,6 +1166,44 @@ function renderFunnel(d) {
     }
   });
   wrap.innerHTML = html;
+}
+
+/* ── TOP 10 OUTREACH RENDERER ── */
+function renderTop10(wk) {
+  var list = document.getElementById('outreach-list');
+  if (!list) return;
+  var d = REPORT.weeks[wk];
+  if (!d || !d.top10 || !d.top10.length) {
+    list.innerHTML = '<div class="outreach-no-data">No individual account data available for ' + (d ? d.label : 'this week') + '.<br>Switch to a more recent week to see the Top 10 list.</div>';
+    return;
+  }
+  var tierLabels = { CLOSE: 'tier-close', ADVANCE: 'tier-advance', QUALIFY: 'tier-qualify' };
+  var html = '';
+  d.top10.forEach(function(a) {
+    var tc  = tierLabels[a.tier] || 'tier-qualify';
+    var hsUrl = 'https://app.hubspot.com/contacts/44390857/record/0-1/' + a.hsId;
+    var metaParts = [];
+    if (a.title) metaParts.push(a.title);
+    metaParts.push('<strong>' + a.company + '</strong>');
+    metaParts.push(a.country);
+    html += '<div class="outreach-card">';
+    html += '<div class="rank-badge">' + a.rank + '</div>';
+    html += '<div class="outreach-body">';
+    html += '<div class="outreach-top">';
+    html += '<span class="outreach-name">' + a.name + '</span>';
+    if (a.deals) html += '<span class="deal-dot">&#9679; ' + a.deals + ' deal</span>';
+    html += '<span class="tier-badge ' + tc + '">' + a.tier + '</span>';
+    html += '</div>';
+    html += '<div class="outreach-meta">' + metaParts.join(' &middot; ') + '</div>';
+    html += '<div class="outreach-contact">&#9993;&nbsp;' + a.email;
+    if (a.phone) html += '&emsp;&#9742;&nbsp;' + a.phone;
+    html += '</div>';
+    html += '<div class="outreach-why"><strong>Why:</strong> ' + a.why + '</div>';
+    html += '<div class="outreach-action"><strong>&#9654; Action:</strong> ' + a.action + '</div>';
+    html += '<a class="hs-link" href="' + hsUrl + '" target="_blank">Open in HubSpot &#8599;</a>';
+    html += '</div></div>';
+  });
+  list.innerHTML = html;
 }
 
 /* ── CHART BUILDERS ── */
