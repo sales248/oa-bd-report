@@ -305,19 +305,36 @@
     .tier-close   { background: rgba(34,197,94,.15);  color: var(--green); }
     .tier-advance { background: rgba(79,110,247,.15); color: var(--accent); }
     .tier-qualify { background: rgba(245,158,11,.15); color: var(--yellow); }
+    .tier-prospect{ background: rgba(6,182,212,.12);  color: var(--cyan); }
+    .tier-section { margin-bottom: 24px; }
+    .tier-section-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+      padding: 10px 16px; border-radius: 8px;
+    }
+    .tier-section-header.hdr-close   { background: rgba(34,197,94,.07);  border-left: 3px solid var(--green); }
+    .tier-section-header.hdr-advance { background: rgba(79,110,247,.07); border-left: 3px solid var(--accent); }
+    .tier-section-header.hdr-qualify { background: rgba(245,158,11,.07); border-left: 3px solid var(--yellow); }
+    .tier-section-header.hdr-prospect{ background: rgba(6,182,212,.07);  border-left: 3px solid var(--cyan); }
+    .tier-section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+    .tier-section-count { font-size: 12px; color: var(--muted); margin-left: auto; }
+    .outreach-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 1100px) { .outreach-grid { grid-template-columns: 1fr; } }
     .outreach-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
     .outreach-card {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 18px 20px;
-      display: flex; gap: 16px; align-items: flex-start;
+      border-radius: var(--radius); padding: 14px 16px;
+      display: flex; gap: 12px; align-items: flex-start;
       transition: border-color .15s;
     }
     .outreach-card:hover { border-color: rgba(79,110,247,.4); }
     .rank-badge {
-      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
       background: var(--surface2); border: 1px solid var(--border);
       display: grid; place-items: center;
-      font-size: 16px; font-weight: 800; color: var(--accent);
+      font-size: 13px; font-weight: 800; color: var(--accent);
     }
     .outreach-body { flex: 1; min-width: 0; }
     .outreach-top { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
@@ -395,7 +412,7 @@
       <span class="nav-icon">&#9889;</span> Action Plan
     </div>
     <div class="nav-item" onclick="switchPage('outreach', this)">
-      <span class="nav-icon">&#127919;</span> Top 10 Outreach
+      <span class="nav-icon">&#127919;</span> Top 50 Outreach
     </div>
     <hr class="sidebar-divider" />
     <div class="sidebar-label">This Week (W17)</div>
@@ -891,20 +908,21 @@
       </div>
     </div>
 
-    <!-- ===== PAGE: TOP 10 OUTREACH ===== -->
+    <!-- ===== PAGE: TOP 50 OUTREACH ===== -->
     <div class="page" id="page-outreach">
-      <div class="section-title">Weekly Top 10: Accounts to Reach Out To</div>
-      <div class="section-sub" id="outreach-sub">Ranked by outreach priority &middot; OA Business Development &middot; Week 17</div>
+      <div class="section-title">Weekly Top 50: Accounts to Reach Out To</div>
+      <div class="section-sub" id="outreach-sub">Ranked by outsourcing potential &middot; OA Business Development &middot; Week 17</div>
 
       <!-- TIER LEGEND -->
       <div class="outreach-legend">
         <div class="legend-item"><span class="tier-badge tier-close">CLOSE</span>Connected + active deal &mdash; follow up to convert</div>
         <div class="legend-item"><span class="tier-badge tier-advance">ADVANCE</span>Connected &mdash; no deal yet &mdash; push to next stage</div>
         <div class="legend-item"><span class="tier-badge tier-qualify">QUALIFY</span>Valid + BD-Qualified &mdash; schedule discovery call</div>
+        <div class="legend-item"><span class="tier-badge tier-prospect">PROSPECT</span>Business signals &mdash; assign validity &amp; outreach</div>
       </div>
 
-      <!-- TOP 10 LIST (JS-rendered) -->
-      <div class="outreach-list" id="outreach-list">
+      <!-- TOP 50 LIST (JS-rendered, grouped by tier) -->
+      <div id="outreach-list">
         <div class="outreach-no-data">Loading&hellip;</div>
       </div>
     </div>
@@ -945,17 +963,57 @@
       "inboundValid": 4, "inboundConnected": 2,
       "outboundValid": 5, "outboundConnected": 0,
       "spValid": 0, "spConnected": 0,
-      "top10": [
-        { "rank":1,  "name":"Elicia Siew Hiang Chan", "title":"Senior Marketing Manager", "company":"Fujifilm",           "email":"elicia.chan.yh@fujifilm.com",        "phone":"+65 9687 4021",    "country":"Singapore",          "validity":"Valid", "status":"CONNECTED", "deals":1, "tier":"CLOSE",   "why":"Global Fortune 500 enterprise. Senior decision-maker already connected with an active deal in the pipeline — highest-value account this week.",                                                                        "action":"Follow up on the open deal — confirm hiring requirements, send proposal, or schedule a formal pitch meeting.", "hsId":"116520320039" },
-        { "rank":2,  "name":"Ana Dameska",            "title":"Head of People & Talent",  "company":"bizdev.ae",           "email":"adameska@bizdev.ae",                 "phone":"+389 070 365 506", "country":"North Macedonia",     "validity":"Valid", "status":"CONNECTED", "deals":1, "tier":"CLOSE",   "why":"Perfect ICP: Head of People & Talent Development at a business development firm. Already connected, deal created. These are exactly the decision-makers who buy outsourcing.",                                        "action":"Follow up on the open deal — ask about active hiring needs and expected close timeframe.",                     "hsId":"116581287953" },
-        { "rank":3,  "name":"Florian Zitz",           "title":"Finance",                  "company":"hiry.agency",          "email":"finance@hiry.agency",               "phone":"+43 0670 3542 124","country":"Austria",             "validity":"Valid", "status":"CONNECTED", "deals":1, "tier":"CLOSE",   "why":"Recruitment/staffing agency with an active deal. Agencies are high-LTV clients and can send recurring outsourcing volume. Finance contact = budget approver.",                                                          "action":"Advance deal to proposal stage — present agency outsourcing pricing and capacity model.",                     "hsId":"116322413656" },
-        { "rank":4,  "name":"Sara B",                 "title":"",                         "company":"BioX Systems",         "email":"sara@bioxsystems.com",              "phone":"+44 7906 279 152", "country":"United Kingdom",      "validity":"Valid", "status":"CONNECTED", "deals":1, "tier":"CLOSE",   "why":"Biotech/systems company with a confirmed active deal from Paid Social. Business email domain confirms legitimacy.",                                                                                                    "action":"Follow up on the open deal — confirm role requirements and send next steps.",                                  "hsId":"117432527741" },
-        { "rank":5,  "name":"Bryant Huang",           "title":"",                         "company":"Lucid Motors",         "email":"bryanthuang@lucidmotors.com",       "phone":"+1 510 365 1111",  "country":"United States",       "validity":"Valid", "status":"Feedback",  "deals":0, "tier":"QUALIFY", "why":"Lucid Motors is a premium EV brand with 3,000+ employees. Corporate email confirms he's a real employee. Fast-growing company with active hiring needs across engineering and operations.",                         "action":"Schedule discovery call — ask about current hiring challenges and volume of open roles.",                      "hsId":"116812468782" },
-        { "rank":6,  "name":"Sandip Patel",           "title":"Chief Executive Officer",  "company":"Keen Tel Engineering", "email":"sandip.patel@keentelengineering.com","phone":"+1 865 771 9190",  "country":"USA (Tampa, FL)",     "validity":"Valid", "status":"Feedback",  "deals":0, "tier":"QUALIFY", "why":"CEO at an engineering firm = direct decision-maker with full budget authority. Reached through Paid Social, indicating active intent. Engineering companies frequently need back-office and tech support outsourced.", "action":"CEO-level personalized outreach — lead with cost savings and time-to-hire metrics specific to engineering firms.", "hsId":"116760339351" },
-        { "rank":7,  "name":"Jonathon Martin",        "title":"Chief Operating Officer",  "company":"Duncan Solutions",     "email":"jmartin@duncansolutions.com.au",    "phone":"+61 407 660 736",  "country":"Australia (Sydney)",  "validity":"Valid", "status":"CONNECTED", "deals":0, "tier":"ADVANCE", "why":"COO at an Australian solutions company. Already connected but no deal created — this is a warm relationship waiting to be advanced. C-suite + business domain + AU market.",                                         "action":"Create a deal in HubSpot and send a formal capabilities overview with AUS client case studies.",               "hsId":"113790097325" },
-        { "rank":8,  "name":"Stephon Grey",           "title":"Managing Director",        "company":"CIFA Consulting",      "email":"stephon.grey@cifa-consulting.com",  "phone":"+1 868 301 3568",  "country":"Trinidad / Miami",    "validity":"Valid", "status":"Feedback",  "deals":0, "tier":"QUALIFY", "why":"Managing Director at a consulting firm. Consulting firms frequently need to scale support staff quickly. Miami city + Caribbean company domain = broad geographic reach.",                                             "action":"Discovery call — explore consulting staff support needs: admin, research, and project coordination roles.",    "hsId":"116220978569" },
-        { "rank":9,  "name":"Paul Newman",            "title":"Founder & CEO",            "company":"The DG Partner Group", "email":"paul@thedgpg.com",                  "phone":"+971 509 640 548", "country":"UK / UAE",            "validity":"Valid", "status":"CONNECTED", "deals":0, "tier":"ADVANCE", "why":"Founder/CEO at a digital growth agency with a UAE phone. Digital agencies are a natural fit for outsourced creative, marketing, and tech staff. Already connected — no deal yet.",                                  "action":"Create a deal and pitch digital marketing and tech role outsourcing tailored to agency workflow.",              "hsId":"116541873466" },
-        { "rank":10, "name":"Ann Hewitt",             "title":"Assistant Service Manager","company":"NHS",                  "email":"ahewitt1@nhs.net",                  "phone":"",                 "country":"United Kingdom",      "validity":"Valid", "status":"Feedback",  "deals":0, "tier":"QUALIFY", "why":"NHS is the UK's largest employer (1.3M staff). Even small NHS teams outsource admin and back-office work. The nhs.net domain is unambiguously legitimate. Very high LTV potential.",                                "action":"Email outreach (no phone available) — lead with healthcare admin and back-office support use cases.",           "hsId":"117548724879" }
+      "topAccounts": [
+        {"rank":1,  "name":"Elicia Siew Hiang Chan","title":"Senior Marketing Manager","company":"Fujifilm",                    "email":"elicia.chan.yh@fujifilm.com",         "phone":"+65 9687 4021",     "country":"Singapore",           "deals":1,"tier":"CLOSE",   "score":95,"why":"Fortune 500 enterprise, Sr. decision-maker, deal in pipeline.","action":"Follow up on open deal — confirm requirements, send proposal or schedule pitch.","hsId":"116520320039"},
+        {"rank":2,  "name":"Ana Dameska",           "title":"Head of People & Talent","company":"bizdev.ae",                    "email":"adameska@bizdev.ae",                  "phone":"+389 070 365 506",  "country":"North Macedonia",     "deals":1,"tier":"CLOSE",   "score":89,"why":"Head of P&T at BD firm — perfect ICP, deal already created.","action":"Follow up on open deal — confirm hiring needs and expected close date.","hsId":"116581287953"},
+        {"rank":3,  "name":"Jonathon Martin",       "title":"Chief Operating Officer","company":"Duncan Solutions",             "email":"jmartin@duncansolutions.com.au",      "phone":"+61 407 660 736",   "country":"Australia (Sydney)",  "deals":0,"tier":"ADVANCE", "score":85,"why":"COO at AU solutions company — connected, warm relationship, no deal yet.","action":"Create deal — send capabilities deck with AU client case studies.","hsId":"113790097325"},
+        {"rank":4,  "name":"Paul Newman",           "title":"Founder & CEO",          "company":"The DG Partner Group",         "email":"paul@thedgpg.com",                    "phone":"+971 509 640 548",  "country":"UK / UAE",            "deals":0,"tier":"ADVANCE", "score":85,"why":"Founder/CEO at digital growth agency, UAE+UK presence — connected, no deal.","action":"Create deal — pitch digital and tech role outsourcing for agency workflow.","hsId":"116541873466"},
+        {"rank":5,  "name":"Florian Zitz",          "title":"Finance",                "company":"hiry.agency",                  "email":"finance@hiry.agency",                 "phone":"+43 0670 354 2124", "country":"Austria",             "deals":1,"tier":"CLOSE",   "score":84,"why":"Staffing agency with active deal — high-LTV client, budget approver contact.","action":"Advance deal to proposal — send agency outsourcing pricing and capacity model.","hsId":"116322413656"},
+        {"rank":6,  "name":"Sandip Patel",          "title":"Chief Executive Officer","company":"Keen Tel Engineering",         "email":"sandip.patel@keentelengineering.com", "phone":"+1 865 771 9190",   "country":"USA (Tampa, FL)",     "deals":0,"tier":"QUALIFY", "score":80,"why":"CEO at engineering firm — direct budget authority, Paid Social intent signal.","action":"CEO-level outreach — lead with engineering back-office cost savings data.","hsId":"116760339351"},
+        {"rank":7,  "name":"Alex Sonson",           "title":"Owner",                  "company":"(Independent)",                "email":"sonsonalex6083@gmail.com",            "phone":"+1 808 294 6055",   "country":"United States",       "deals":1,"tier":"CLOSE",   "score":80,"why":"Owner + CONNECTED + active deal — full decision-making authority.","action":"Follow up on open deal — confirm role requirements and timeline.","hsId":"117273280552"},
+        {"rank":8,  "name":"Stephon Grey",          "title":"Managing Director",      "company":"CIFA Consulting",              "email":"stephon.grey@cifa-consulting.com",    "phone":"+1 868 301 3568",   "country":"Trinidad / Miami",    "deals":0,"tier":"QUALIFY", "score":78,"why":"MD at consulting firm — top decision-maker, consulting firms need scalable staff.","action":"Discovery call — explore consulting staff support and project admin roles.","hsId":"116220978569"},
+        {"rank":9,  "name":"Ann Hewitt",            "title":"Asst. Service Manager",  "company":"NHS",                          "email":"ahewitt1@nhs.net",                    "phone":"",                  "country":"United Kingdom",      "deals":0,"tier":"QUALIFY", "score":77,"why":"NHS UK (1.3M employees) — even small teams outsource admin at scale.","action":"Email outreach — lead with healthcare admin and back-office support use cases.","hsId":"117548724879"},
+        {"rank":10, "name":"Essau Sleiman",         "title":"",                       "company":"Patterson Dental",             "email":"sleiman.essau@pattersondental.com",   "phone":"",                  "country":"United States",       "deals":1,"tier":"CLOSE",   "score":77,"why":"Patterson Dental (major healthcare distributor) — connected, deal active.","action":"Follow up on open deal — confirm healthcare role requirements.","hsId":"116652794419"},
+        {"rank":11, "name":"Nathaniel Getzels",     "title":"Board of Directors",     "company":"Berkshire Hathaway HomeServices","email":"nathaniel@getzelshomes.com",        "phone":"+1 818 535 5337",   "country":"USA (Calabasas)",     "deals":0,"tier":"PROSPECT","score":75,"why":"Board member at Fortune 500 real estate brand — validity unassigned, high-value.","action":"Assign validity first, then executive outreach — real estate staff outsourcing.","hsId":"117507246973"},
+        {"rank":12, "name":"Sara B",                "title":"",                       "company":"BioX Systems",                 "email":"sara@bioxsystems.com",                "phone":"+44 7906 279 152",  "country":"United Kingdom",      "deals":1,"tier":"CLOSE",   "score":75,"why":"Biotech company, active deal, UK business domain confirmed.","action":"Follow up on open deal — confirm role requirements and next steps.","hsId":"117432527741"},
+        {"rank":13, "name":"Ralph Michele",         "title":"",                       "company":"RJM Designs NY",               "email":"ralph@rjmdesignsny.com",              "phone":"+1 516 818 5368",   "country":"United States",       "deals":1,"tier":"CLOSE",   "score":75,"why":"NY design firm, business domain, CONNECTED with active deal.","action":"Follow up on open deal — explore design support or creative VA needs.","hsId":"115924750692"},
+        {"rank":14, "name":"Abid Mehmood",          "title":"",                       "company":"CSCP UK",                      "email":"info@cscp-uk.com",                    "phone":"+61 045 202 0952",  "country":"UK / Australia",      "deals":1,"tier":"CLOSE",   "score":74,"why":"UK consultancy, business domain, connected with active deal.","action":"Follow up on open deal — establish specific role requirements.","hsId":"116379980440"},
+        {"rank":15, "name":"Andrea Lopez",          "title":"",                       "company":"Linear Lighting Miami",        "email":"andrea@linearlightingmiami.com",      "phone":"+1 305 718 4114",   "country":"USA (Miami)",         "deals":1,"tier":"CLOSE",   "score":73,"why":"Lighting company, Miami, business domain, Organic Search — connected + deal.","action":"Follow up on open deal — confirm staff support requirements.","hsId":"117056240993"},
+        {"rank":16, "name":"Bryant Huang",          "title":"",                       "company":"Lucid Motors",                 "email":"bryanthuang@lucidmotors.com",         "phone":"+1 510 365 1111",   "country":"United States",       "deals":0,"tier":"QUALIFY", "score":70,"why":"Lucid Motors (Fortune 500 EV brand) — corporate email, real employee, active hiring.","action":"Schedule discovery — ask about hiring volume and open roles across the org.","hsId":"116812468782"},
+        {"rank":17, "name":"Jean Thompson",         "title":"",                       "company":"Taylored Care",                "email":"jean@tayloredcare.com",               "phone":"+1 310 717 5999",   "country":"United States",       "deals":1,"tier":"CLOSE",   "score":70,"why":"Care company, connected with active deal — verify fit on discovery call.","action":"Follow up on open deal — re-verify requirements and confirm outsourcing need.","hsId":"116747742366"},
+        {"rank":18, "name":"Sean Conroy",           "title":"Physician Assistant",    "company":"inventivehq.com",              "email":"sean@econroy.com",                    "phone":"+1 (707) 326-9485", "country":"United States",       "deals":0,"tier":"QUALIFY", "score":70,"why":"Healthcare + SaaS crossover professional, business domain, Valid + BD-Qualified.","action":"Discovery call — explore admin and tech support outsourcing.","hsId":"116730407999"},
+        {"rank":19, "name":"Kevin Amaya",           "title":"",                       "company":"Amaya Team",                   "email":"info@amayateam.com",                  "phone":"+1 (571) 409-7653", "country":"United States",       "deals":0,"tier":"ADVANCE", "score":65,"why":"Business-domain email, connected — relationship ready to advance.","action":"Create deal — pitch VA or admin support, send capabilities deck.","hsId":"117441457540"},
+        {"rank":20, "name":"Bob Khod",              "title":"",                       "company":"Apex Houzz",                   "email":"apexhouzz@gmail.com",                 "phone":"+1 717 797 0707",   "country":"United States",       "deals":1,"tier":"CLOSE",   "score":60,"why":"Real estate/home services (Apex Houzz), CONNECTED with active deal.","action":"Follow up on open deal — confirm property management support needs.","hsId":"117120813634"},
+        {"rank":21, "name":"Toby Doré",             "title":"",                       "company":"(Individual)",                 "email":"tobyldore@gmail.com",                 "phone":"+1 337 501 5002",   "country":"United States",       "deals":1,"tier":"CLOSE",   "score":60,"why":"Direct Traffic, connected with active deal — high-intent.","action":"Follow up on open deal — identify specific role requirements.","hsId":"155443044181"},
+        {"rank":22, "name":"Kerri Luschen",         "title":"",                       "company":"(Insurance)",                  "email":"insurewithcarylann@gmail.com",        "phone":"+1 469 768 7000",   "country":"United States",       "deals":1,"tier":"CLOSE",   "score":60,"why":"Insurance professional (email signals), connected with active deal.","action":"Follow up — confirm role requirements, insurance admin support.","hsId":"117478518037"},
+        {"rank":23, "name":"Dan Melcon",            "title":"",                       "company":"(Individual)",                 "email":"danimelcon14@yahoo.com",              "phone":"+1 786 447 5076",   "country":"United States",       "deals":1,"tier":"CLOSE",   "score":60,"why":"Connected with active deal — confirmed interest.","action":"Follow up on open deal — establish specific outsourcing requirements.","hsId":"116782095976"},
+        {"rank":24, "name":"Taila Gillespie",       "title":"",                       "company":"Passive Home Investor",        "email":"passivehomeinvestor@gmail.com",       "phone":"+1 619 888 2223",   "country":"United States",       "deals":1,"tier":"CLOSE",   "score":60,"why":"Real estate investor, connected with active deal — recurring VA need likely.","action":"Follow up — real estate admin and VA support discussion.","hsId":"115926715205"},
+        {"rank":25, "name":"Anthony Quezada",       "title":"",                       "company":"(Real Estate Investor)",       "email":"atq.rei@gmail.com",                   "phone":"+1 909 957 6249",   "country":"United States",       "deals":1,"tier":"CLOSE",   "score":60,"why":"REI (Real Estate Investor email), connected with active deal.","action":"Follow up — real estate admin and VA support, confirm active requirements.","hsId":"115909067136"},
+        {"rank":26, "name":"Wendy Filius",          "title":"",                       "company":"Shine On Pro",                 "email":"wendy@shineonpro.net",                "phone":"+1 727 307 9720",   "country":"United States",       "deals":0,"tier":"QUALIFY", "score":60,"why":"Business domain, Valid + BD-Qualified, US Paid Social.","action":"Discovery call — explore back-office or marketing admin support.","hsId":"117063006869"},
+        {"rank":27, "name":"Larry Goldstein",       "title":"",                       "company":"LJG Health",                   "email":"larry@ljghealth.com",                 "phone":"+1 602 989 4200",   "country":"United States",       "deals":0,"tier":"QUALIFY", "score":60,"why":"Healthcare company, business domain, Valid + BD-Qualified.","action":"Discovery call — healthcare admin, billing, and patient support.","hsId":"116847383941"},
+        {"rank":28, "name":"Bessie Pope",           "title":"",                       "company":"Jameson Sotheby's IR",         "email":"bpope@jamesonsir.com",                "phone":"+1 630 854 0837",   "country":"United States",       "deals":0,"tier":"QUALIFY", "score":60,"why":"Jameson Sotheby's International Realty — premium real estate, business domain.","action":"Discovery call — real estate admin, transaction coordination, or VA roles.","hsId":"116350400850"},
+        {"rank":29, "name":"Tush Shah",             "title":"",                       "company":"AGCL Services",                "email":"info@agclservices.com",               "phone":"+44 730 517 7309",  "country":"India / UK",          "deals":0,"tier":"QUALIFY", "score":60,"why":"Business services company, UK phone, Valid + BD-Qualified.","action":"Discovery call — explore business services support and admin roles.","hsId":"116232981035"},
+        {"rank":30, "name":"Elvis Yong",            "title":"",                       "company":"Wild Splash",                  "email":"elvis@wild-splash.com",               "phone":"+65 9772 8610",     "country":"Singapore",           "deals":0,"tier":"QUALIFY", "score":60,"why":"Business domain, Singapore, Valid + BD-Qualified via Paid Social.","action":"Discovery call — marketing and digital role outsourcing.","hsId":"116007857313"},
+        {"rank":31, "name":"Malayna Lemana",        "title":"",                       "company":"Able Mind AU",                 "email":"malayna@ablemind.com.au",             "phone":"+61 401 543 374",   "country":"Australia",           "deals":0,"tier":"QUALIFY", "score":60,"why":"Mental wellness company, AU business domain, Valid + BD-Qualified.","action":"Discovery call — admin and client support outsourcing.","hsId":"117517152651"},
+        {"rank":32, "name":"Vera Y",                "title":"",                       "company":"Vera Yazid",                   "email":"vera@verayazid.com",                  "phone":"+61 423 000 000",   "country":"Australia",           "deals":0,"tier":"ADVANCE", "score":60,"why":"Personal brand, AU business domain, connected — no deal created yet.","action":"Create deal — pitch personal brand VA and admin support.","hsId":"116773336239"},
+        {"rank":33, "name":"Radha Sidhu",           "title":"",                       "company":"(Individual)",                 "email":"sidhupay@hotmail.com",                "phone":"+44 079 434 19773", "country":"UAE",                 "deals":1,"tier":"CLOSE",   "score":59,"why":"UAE-based, Direct Traffic, connected with active deal.","action":"Follow up on open deal — confirm specific requirements.","hsId":"116530212372"},
+        {"rank":34, "name":"Emil Heltoft",          "title":"",                       "company":"Folmer Automation",            "email":"emil@folmerautomation.dk",            "phone":"+45 6029 1036",     "country":"Denmark",             "deals":0,"tier":"QUALIFY", "score":59,"why":"Automation company, Denmark business domain, Valid + BD-Qualified.","action":"Discovery call — tech and engineering back-office support.","hsId":"116565257230"},
+        {"rank":35, "name":"Juan Pablo Pérez",      "title":"",                       "company":"Tecno Office",                 "email":"jpperez@tecno-office.com",            "phone":"+52 333 100 9106",  "country":"Mexico (Guadalajara)", "deals":0,"tier":"QUALIFY", "score":58,"why":"Tech company, Guadalajara, business domain, Valid + BD-Qualified.","action":"Discovery call — IT support and admin outsourcing for LatAm market.","hsId":"117021926214"},
+        {"rank":36, "name":"Liz Nhu",               "title":"",                       "company":"Markus Agency",                "email":"nhuvananh@markus.agency",             "phone":"+84 707 140 219",   "country":"Vietnam",             "deals":0,"tier":"QUALIFY", "score":57,"why":"Marketing agency domain, Vietnam, Valid + BD-Qualified.","action":"Discovery call — agency creative and digital support roles.","hsId":"115966942120"},
+        {"rank":37, "name":"Ben Lam",               "title":"",                       "company":"(Individual)",                 "email":"ltmisme@gmail.com",                   "phone":"+65 9362 1688",     "country":"Malaysia / Singapore","deals":1,"tier":"CLOSE",   "score":57,"why":"Singapore phone, Paid Social, connected with active deal.","action":"Follow up on open deal — confirm requirements and timeline.","hsId":"116580841017"},
+        {"rank":38, "name":"Molly Naidoo",          "title":"",                       "company":"TSM Academy",                  "email":"tsmacademy@safrica.com",              "phone":"+27 065 915 1052",  "country":"South Africa",        "deals":0,"tier":"QUALIFY", "score":51,"why":"Education academy, business email, Valid + BD-Qualified.","action":"Discovery call — education admin and content support.","hsId":"116113599407"},
+        {"rank":39, "name":"Aasish Ponna",          "title":"",                       "company":"(Individual)",                 "email":"aasish@me.com",                       "phone":"+61 043 183 9891",  "country":"Australia",           "deals":0,"tier":"QUALIFY", "score":50,"why":"AU Paid Social, Apple email signals quality, Valid + BD-Qualified.","action":"Discovery call — personalized outreach via LinkedIn or phone.","hsId":"116555073880"},
+        {"rank":40, "name":"Edisona Kukaj",         "title":"",                       "company":"(Individual)",                 "email":"edisona.kukaj@gmail.com",             "phone":"+39 328 142 8907",  "country":"Italy (Japan-based)", "deals":0,"tier":"ADVANCE", "score":49,"why":"Connected European professional in Asia — no deal yet.","action":"Create deal — explore remote support needs for EU/Asia operations.","hsId":"116361719118"},
+        {"rank":41, "name":"Paul Hill",             "title":"",                       "company":"UK Hair Transplant Clinics",   "email":"paulhill@ukhairtransplantclinics.co.uk","phone":"+44 077 121 88753","country":"United Kingdom",      "deals":0,"tier":"PROSPECT","score":45,"why":"Medical clinic, UK Paid Social — validity unassigned, strong signals.","action":"Assign validity first, then outreach — patient admin and scheduling support.","hsId":"117687362884"},
+        {"rank":42, "name":"Amit Solanki",          "title":"",                       "company":"OM Construction AU",           "email":"admin@omconstruction.com.au",         "phone":"+61 041 591 5397",  "country":"Australia",           "deals":0,"tier":"PROSPECT","score":45,"why":"AU construction company, business email — validity unassigned.","action":"Assign validity first, then outreach — construction admin and site support.","hsId":"116505685121"},
+        {"rank":43, "name":"Henry Liang",           "title":"",                       "company":"(Individual)",                 "email":"liangy800@gmail.com",                 "phone":"+1 917 688 7901",   "country":"United States",       "deals":0,"tier":"QUALIFY", "score":45,"why":"Valid + BD-Qualified, US-based, Offline source.","action":"Discovery call — identify specific business and outsourcing needs.","hsId":"117512694437"},
+        {"rank":44, "name":"H Bony",                "title":"",                       "company":"(Individual)",                 "email":"habony@hotmail.com",                  "phone":"+1 (305) 893-9990", "country":"United States",       "deals":0,"tier":"QUALIFY", "score":45,"why":"Valid + BD-Qualified, Miami (305 area), Direct Traffic.","action":"Discovery call — identify business and outsourcing needs.","hsId":"116696325305"},
+        {"rank":45, "name":"Kyle Jackson",          "title":"",                       "company":"(Individual)",                 "email":"kylezyt@gmail.com",                   "phone":"+44 075 682 45874", "country":"United Kingdom",      "deals":0,"tier":"QUALIFY", "score":45,"why":"UK, Valid + BD-Qualified, Paid Social.","action":"Discovery call — explore back-office or digital support needs.","hsId":"117014402398"},
+        {"rank":46, "name":"Sri Gudur",             "title":"",                       "company":"Focus Homes",                  "email":"focushomesdeals@gmail.com",           "phone":"+1 732 627 2949",   "country":"United States",       "deals":0,"tier":"QUALIFY", "score":45,"why":"Real estate (Focus Homes Deals), Valid + BD-Qualified.","action":"Discovery call — real estate admin and VA support.","hsId":"117117311665"},
+        {"rank":47, "name":"Michael Hobbs",         "title":"",                       "company":"(Individual)",                 "email":"hobbs2000@gmail.com",                 "phone":"+1 773 388 0003",   "country":"United States",       "deals":0,"tier":"QUALIFY", "score":45,"why":"Valid + BD-Qualified, US Offline source.","action":"Discovery call — identify outsourcing needs.","hsId":"116384474754"},
+        {"rank":48, "name":"Mike Mossino",          "title":"",                       "company":"(Individual)",                 "email":"mikemossino@gmail.com",               "phone":"+1 786 450 2218",   "country":"United States",       "deals":0,"tier":"QUALIFY", "score":45,"why":"Valid + BD-Qualified, Miami (786 area), Offline source.","action":"Discovery call — identify outsourcing needs.","hsId":"116255902782"},
+        {"rank":49, "name":"Dipesh Humagain",       "title":"",                       "company":"(Individual)",                 "email":"dipeshhumagain4@gmail.com",           "phone":"+48 790 729 377",   "country":"Poland",              "deals":0,"tier":"QUALIFY", "score":44,"why":"Valid + BD-Qualified, Poland — potential EU market client.","action":"Discovery call — explore European market outsourcing needs.","hsId":"117371575834"},
+        {"rank":50, "name":"Uhan Nostalniu",        "title":"",                       "company":"(Individual)",                 "email":"adsoshs@gmail.com",                   "phone":"+880 174 862 9223", "country":"Bangladesh",          "deals":0,"tier":"QUALIFY", "score":42,"why":"Valid + BD-Qualified — include for completeness, lower confidence.","action":"Discovery call — confirm business context before investing outreach time.","hsId":"116292639344"}
       ]
     }
   }
@@ -1168,39 +1226,62 @@ function renderFunnel(d) {
   wrap.innerHTML = html;
 }
 
-/* ── TOP 10 OUTREACH RENDERER ── */
+/* ── TOP 50 OUTREACH RENDERER ── */
 function renderTop10(wk) {
   var list = document.getElementById('outreach-list');
   if (!list) return;
   var d = REPORT.weeks[wk];
-  if (!d || !d.top10 || !d.top10.length) {
-    list.innerHTML = '<div class="outreach-no-data">No individual account data available for ' + (d ? d.label : 'this week') + '.<br>Switch to a more recent week to see the Top 10 list.</div>';
+  if (!d || !d.topAccounts || !d.topAccounts.length) {
+    list.innerHTML = '<div class="outreach-no-data">No individual account data available for ' + (d ? d.label : 'this week') + '.<br>Switch to a more recent week to see the Top 50 list.</div>';
     return;
   }
-  var tierLabels = { CLOSE: 'tier-close', ADVANCE: 'tier-advance', QUALIFY: 'tier-qualify' };
+  var tc = { CLOSE:'tier-close', ADVANCE:'tier-advance', QUALIFY:'tier-qualify', PROSPECT:'tier-prospect' };
+  var hdrCls = { CLOSE:'hdr-close', ADVANCE:'hdr-advance', QUALIFY:'hdr-qualify', PROSPECT:'hdr-prospect' };
+  var hdrTitle = {
+    CLOSE:   'CLOSE — Connected + Active Deal · Follow up to convert',
+    ADVANCE: 'ADVANCE — Connected · No deal yet · Push to next stage',
+    QUALIFY: 'QUALIFY — Valid + BD-Qualified · Schedule discovery call',
+    PROSPECT:'PROSPECT — Business signals · Assign validity &amp; outreach'
+  };
+  var tierOrder = ['CLOSE','ADVANCE','QUALIFY','PROSPECT'];
+  var grouped = {};
+  d.topAccounts.forEach(function(a) { (grouped[a.tier] = grouped[a.tier]||[]).push(a); });
+
+  function cardHtml(a) {
+    var url = 'https://app.hubspot.com/contacts/44390857/record/0-1/' + a.hsId;
+    var meta = [];
+    if (a.title) meta.push(a.title);
+    meta.push('<strong>' + a.company + '</strong>');
+    meta.push(a.country);
+    var h = '<div class="outreach-card">';
+    h += '<div class="rank-badge">' + a.rank + '</div>';
+    h += '<div class="outreach-body">';
+    h += '<div class="outreach-top"><span class="outreach-name">' + a.name + '</span>';
+    if (a.deals) h += '<span class="deal-dot">&nbsp;&#9679;&nbsp;' + a.deals + ' deal</span>';
+    h += '<span class="tier-badge ' + (tc[a.tier]||'tier-qualify') + '" style="margin-left:auto">' + a.tier + '</span>';
+    h += '</div>';
+    h += '<div class="outreach-meta">' + meta.join(' &middot; ') + '</div>';
+    h += '<div class="outreach-contact">&#9993;&nbsp;' + a.email;
+    if (a.phone) h += '&emsp;&#9742;&nbsp;' + a.phone;
+    h += '</div>';
+    h += '<div class="outreach-why"><strong>Why:</strong> ' + a.why + '</div>';
+    h += '<div class="outreach-action"><strong>&#9654;</strong> ' + a.action + '</div>';
+    h += '<a class="hs-link" href="' + url + '" target="_blank">Open in HubSpot &#8599;</a>';
+    h += '</div></div>';
+    return h;
+  }
+
   var html = '';
-  d.top10.forEach(function(a) {
-    var tc  = tierLabels[a.tier] || 'tier-qualify';
-    var hsUrl = 'https://app.hubspot.com/contacts/44390857/record/0-1/' + a.hsId;
-    var metaParts = [];
-    if (a.title) metaParts.push(a.title);
-    metaParts.push('<strong>' + a.company + '</strong>');
-    metaParts.push(a.country);
-    html += '<div class="outreach-card">';
-    html += '<div class="rank-badge">' + a.rank + '</div>';
-    html += '<div class="outreach-body">';
-    html += '<div class="outreach-top">';
-    html += '<span class="outreach-name">' + a.name + '</span>';
-    if (a.deals) html += '<span class="deal-dot">&#9679; ' + a.deals + ' deal</span>';
-    html += '<span class="tier-badge ' + tc + '">' + a.tier + '</span>';
+  tierOrder.forEach(function(tier) {
+    var items = grouped[tier];
+    if (!items || !items.length) return;
+    html += '<div class="tier-section">';
+    html += '<div class="tier-section-header ' + (hdrCls[tier]||'hdr-qualify') + '">';
+    html += '<span class="tier-section-title">' + hdrTitle[tier] + '</span>';
+    html += '<span class="tier-section-count">' + items.length + ' account' + (items.length>1?'s':'') + '</span>';
     html += '</div>';
-    html += '<div class="outreach-meta">' + metaParts.join(' &middot; ') + '</div>';
-    html += '<div class="outreach-contact">&#9993;&nbsp;' + a.email;
-    if (a.phone) html += '&emsp;&#9742;&nbsp;' + a.phone;
-    html += '</div>';
-    html += '<div class="outreach-why"><strong>Why:</strong> ' + a.why + '</div>';
-    html += '<div class="outreach-action"><strong>&#9654; Action:</strong> ' + a.action + '</div>';
-    html += '<a class="hs-link" href="' + hsUrl + '" target="_blank">Open in HubSpot &#8599;</a>';
+    html += '<div class="outreach-grid">';
+    items.forEach(function(a) { html += cardHtml(a); });
     html += '</div></div>';
   });
   list.innerHTML = html;
