@@ -36,14 +36,26 @@ MANILA_TZ      = timezone(timedelta(hours=8))
 
 HTML_FILE      = os.path.join(os.path.dirname(__file__), "bd-weekly-report.html")
 
-# ── HubSpot contact property names (internal names, not display labels) ──────
-# Run with --discover to list all custom properties and find the correct names.
-PROP_LEAD_CATEGORY = "lead_category"   # filter value: "BD Lead"
-PROP_VALIDITY      = "lead_validity"   # Valid | Valid-NI | Spam | Job Seeker | Service Provider | Unqualified
-PROP_SOURCE_TYPE   = "outreach_type"   # Inbound | Outbound | SP | Other
-PROP_CONNECTED     = "is_connected"    # true / false  OR  Yes / No
+# ── HubSpot contact property names (confirmed via API schema discovery) ───────
+PROP_LEAD_CATEGORY = "lead_category"   # Source/type of BD contact
+PROP_VALIDITY      = "lead_validity"   # Lead validity classification
+PROP_LEAD_STATUS   = "hs_lead_status"  # "CONNECTED" means lead replied/engaged
 
-BD_LEAD_VALUE  = "BD Lead"
+# lead_category values → source bucket
+INBOUND_VALUES  = {"BD Lead"}
+OUTBOUND_VALUES = {"OA Outbound", "BizDev Outbound", "Outbound Enterprise", "Duane Test"}
+SP_VALUES       = {"SP Lead", "SP Lead Enterprise"}
+ALL_BD_VALUES   = INBOUND_VALUES | OUTBOUND_VALUES | SP_VALUES | {"Inbound Transfer"}
+
+# lead_validity values
+VALID_STRICT_VALUES  = {"Valid"}
+VALID_NI_VALUES      = {"Valid - Not Interested", "Valid - Unreachable"}
+SPAM_VALUES          = {"Invalid - Spam"}
+JOBSEEKER_VALUES     = {"Invalid - Jobseeker"}
+SP_INVALID_VALUES    = {"Invalid - Service Provider", "Invalid - Potential SP"}
+UNQUALIFIED_VALUES   = {"Invalid - Unqualified"}
+
+CONNECTED_VALUE = "CONNECTED"  # hs_lead_status value
 
 # Stage IDs
 STAGES = {
@@ -87,26 +99,24 @@ ACTIVE_STAGES = {v for k, v in STAGES.items()
 # ── VALIDITY / SOURCE NORMALISATION ──────────────────────────────────────────
 
 def norm_validity(raw):
-    v = (raw or "").strip().lower()
-    if v in ("valid",):                          return "valid_strict"
-    if v in ("valid-ni", "valid - not interested", "valid ni", "not interested"): return "valid_ni"
-    if v in ("spam", "spam/dncl"):               return "spam"
-    if v in ("job seeker", "jobseeker"):         return "jobseeker"
-    if v in ("service provider", "sp"):          return "service_provider"
-    if v in ("unqualified",):                    return "unqualified"
+    v = (raw or "").strip()
+    if v in VALID_STRICT_VALUES:  return "valid_strict"
+    if v in VALID_NI_VALUES:      return "valid_ni"
+    if v in SPAM_VALUES:          return "spam"
+    if v in JOBSEEKER_VALUES:     return "jobseeker"
+    if v in SP_INVALID_VALUES:    return "service_provider"
+    if v in UNQUALIFIED_VALUES:   return "unqualified"
     return "no_validity"
 
-def norm_source(raw):
-    v = (raw or "").strip().lower()
-    if "inbound" in v:                           return "inbound"
-    if "outbound" in v:                          return "outbound"
-    if v in ("sp", "source partner"):            return "sp"
-    if v in ("other", "mixed"):                  return "other"
-    return "inbound"  # default
+def norm_source(lead_cat):
+    v = (lead_cat or "").strip()
+    if v in INBOUND_VALUES:  return "inbound"
+    if v in OUTBOUND_VALUES: return "outbound"
+    if v in SP_VALUES:       return "sp"
+    return "other"
 
-def is_connected(raw):
-    v = (raw or "").strip().lower()
-    return v in ("true", "yes", "1", "connected")
+def is_connected(lead_status):
+    return (lead_status or "").strip() == CONNECTED_VALUE
 
 # ── DATE HELPERS ──────────────────────────────────────────────────────────────
 
@@ -126,8 +136,8 @@ def current_week_range():
 
     return start, end, week_num, dates_label
 
-def to_ms(dt):
-    return int(dt.timestamp() * 1000)
+def to_iso(dt):
+    return dt.isoformat()
 
 # ── HUBSPOT HELPERS ──────────────────────────────────────────────────────────
 
@@ -141,20 +151,38 @@ def search_contacts(filters, properties, limit=100):
     r.raise_for_status()
     return r.json()
 
-def search_all_contacts(filters, properties):
-    """Paginate through all matching contacts (max ~10 000)."""
+def _search_one_batch(filter_groups, properties):
+    """Single paginated contacts search (≤5 filter groups per HubSpot limit)."""
     results, after = [], None
     while True:
-        body = {"filterGroups": [{"filters": filters}], "properties": properties, "limit": 100}
+        body = {"filterGroups": filter_groups, "properties": properties, "limit": 100}
         if after:
             body["after"] = after
         r = requests.post(f"{BASE_URL}/crm/v3/objects/contacts/search", headers=HEADERS, json=body)
-        r.raise_for_status()
+        if not r.ok:
+            print(f"  [WARN] contacts search {r.status_code}: {r.text[:200]}")
+            break
         data = r.json()
         results.extend(data.get("results", []))
         after = data.get("paging", {}).get("next", {}).get("after")
         if not after:
             break
+    return results
+
+def search_contacts_by_categories(cat_values, shared_filters, properties):
+    """Search contacts matching any lead_category value + shared_filters.
+    Batches into groups of 5 to stay within HubSpot's filter group limit."""
+    seen, results = set(), []
+    for i in range(0, len(cat_values), 5):
+        batch = cat_values[i:i+5]
+        groups = [
+            {"filters": [{"propertyName": PROP_LEAD_CATEGORY, "operator": "EQ", "value": v}] + shared_filters}
+            for v in batch
+        ]
+        for c in _search_one_batch(groups, properties):
+            if c["id"] not in seen:
+                seen.add(c["id"])
+                results.append(c)
     return results
 
 def search_all_deals(filters, properties):
@@ -276,16 +304,16 @@ def build_action(tier, has_active_deal, connected):
 # ── WEEKLY CONTACTS STATS ─────────────────────────────────────────────────────
 
 def fetch_weekly_contacts(start, end):
-    """Fetch BD Lead contacts created in [start, end] and compute stats."""
-    filters = [
-        {"propertyName": PROP_LEAD_CATEGORY, "operator": "EQ",  "value": BD_LEAD_VALUE},
-        {"propertyName": "createdate",        "operator": "GTE", "value": str(to_ms(start))},
-        {"propertyName": "createdate",        "operator": "LTE", "value": str(to_ms(end))},
+    """Fetch all BD-related contacts created in [start, end] and compute stats."""
+    # One filter group per BD category value (avoids IN operator quirks)
+    date_filters = [
+        {"propertyName": "createdate", "operator": "GTE", "value": to_iso(start)},
+        {"propertyName": "createdate", "operator": "LTE", "value": to_iso(end)},
     ]
-    props = [PROP_VALIDITY, PROP_SOURCE_TYPE, PROP_CONNECTED,
+    props = [PROP_LEAD_CATEGORY, PROP_VALIDITY, PROP_LEAD_STATUS,
              "firstname","lastname","jobtitle","company","email","phone","hs_country_code"]
-    contacts = search_all_contacts(filters, props)
-    print(f"  Weekly BD Lead contacts found: {len(contacts)}")
+    contacts = search_contacts_by_categories(list(ALL_BD_VALUES), date_filters, props)
+    print(f"  Weekly BD contacts found: {len(contacts)}")
 
     stats = dict(contacts_total=0, valid_strict=0, valid_ni=0, spam=0,
                  jobseeker=0, service_provider=0, unqualified=0, no_validity=0,
@@ -298,8 +326,8 @@ def fetch_weekly_contacts(start, end):
     for c in contacts:
         p        = c.get("properties", {})
         val_key  = norm_validity(p.get(PROP_VALIDITY))
-        src_key  = norm_source(p.get(PROP_SOURCE_TYPE))
-        conn     = is_connected(p.get(PROP_CONNECTED))
+        src_key  = norm_source(p.get(PROP_LEAD_CATEGORY))
+        conn     = is_connected(p.get(PROP_LEAD_STATUS))
         is_valid = val_key in ("valid_strict", "valid_ni")
 
         stats["contacts_total"]  += 1
@@ -324,8 +352,8 @@ def fetch_weekly_contacts(start, end):
 def fetch_deals_created_count(start, end):
     filters = [
         {"propertyName": "pipeline",   "operator": "EQ",  "value": BD_PIPELINE_ID},
-        {"propertyName": "createdate", "operator": "GTE", "value": str(to_ms(start))},
-        {"propertyName": "createdate", "operator": "LTE", "value": str(to_ms(end))},
+        {"propertyName": "createdate", "operator": "GTE", "value": to_iso(start)},
+        {"propertyName": "createdate", "operator": "LTE", "value": to_iso(end)},
     ]
     body = {"filterGroups": [{"filters": filters}], "properties": ["hs_object_id"], "limit": 1}
     r = requests.post(f"{BASE_URL}/crm/v3/objects/deals/search", headers=HEADERS, json=body)
@@ -338,18 +366,14 @@ def fetch_top_50():
     """Fetch top BD Lead contacts for the outreach ranking."""
     print("  Fetching top contacts for outreach ranking…")
 
-    # Fetch recent BD Lead contacts (last 90 days for a useful pool)
+    # Fetch recent BD contacts (last 90 days for a useful pool)
     now = datetime.now(MANILA_TZ)
     ninety_days_ago = now - timedelta(days=90)
-    filters = [
-        {"propertyName": PROP_LEAD_CATEGORY, "operator": "EQ", "value": BD_LEAD_VALUE},
-        {"propertyName": "createdate", "operator": "GTE", "value": str(to_ms(ninety_days_ago))},
-    ]
-    props = [PROP_VALIDITY, PROP_SOURCE_TYPE, PROP_CONNECTED,
-             "firstname","lastname","jobtitle","company","email","phone","hs_country_code",
-             "hs_analytics_source"]
-    contacts = search_all_contacts(filters, props)
-    print(f"  Pool: {len(contacts)} BD Lead contacts")
+    date_filter = [{"propertyName": "createdate", "operator": "GTE", "value": to_iso(ninety_days_ago)}]
+    props = [PROP_LEAD_CATEGORY, PROP_VALIDITY, PROP_LEAD_STATUS,
+             "firstname","lastname","jobtitle","company","email","phone","hs_country_code"]
+    contacts = search_contacts_by_categories(list(ALL_BD_VALUES), date_filter, props)
+    print(f"  Pool: {len(contacts)} BD contacts (90 days)")
 
     # Get deal associations in batch
     contact_ids = [c["id"] for c in contacts]
@@ -364,7 +388,7 @@ def fetch_top_50():
     for c in contacts:
         p       = c.get("properties", {})
         val_key = norm_validity(p.get(PROP_VALIDITY))
-        conn    = is_connected(p.get(PROP_CONNECTED))
+        conn    = is_connected(p.get(PROP_LEAD_STATUS))
 
         deal_ids = assoc_map.get(c["id"], [])
         active_deals = [d for did in deal_ids
@@ -566,7 +590,7 @@ def update_html(week_num, week_data, paid_deals_data, today):
 
     with open(HTML_FILE, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"  ✓ HTML updated → {HTML_FILE}")
+    print(f"  HTML updated: {HTML_FILE}")
 
 # ── DISCOVER MODE ─────────────────────────────────────────────────────────────
 
@@ -626,7 +650,7 @@ def main():
 
     today = datetime.now(MANILA_TZ)
     print(f"\n[{today.isoformat()}] OA BD Weekly Report Updater")
-    print("─" * 55)
+    print("-" * 55)
 
     start, end, week_num, dates_label = current_week_range()
     print(f"  Week {week_num}: {dates_label} ({start.date()} → {end.date()})")
@@ -687,7 +711,7 @@ def main():
     print("\n[Patching HTML]")
     update_html(week_num, week_data, paid_deals, today)
 
-    print(f"\n✓ Done — Week {week_num} ({dates_label}) committed to HTML.")
+    print(f"\nDone - Week {week_num} ({dates_label}) committed to HTML.")
     print(f"  Next update: next Tuesday\n")
 
 
