@@ -101,6 +101,23 @@ STAGE_LABELS = {
 ACTIVE_STAGES = {v for k, v in STAGES.items()
                  if k not in ("closed_won", "closed_lost", "deal_unqualified")}
 
+# Stages that indicate DC / AC was attended, or Paid Fee reached
+DC_ATTENDED_STAGES = frozenset({
+    STAGES["dc_completed"],
+    STAGES["ac_outreach"], STAGES["ac_no_show"], STAGES["ac_completed"],
+    STAGES["cd_main"], STAGES["cd_scheduled"], STAGES["cd_no_show"], STAGES["cd_completed"],
+    STAGES["hiring_recruiting"], STAGES["closed_won"],
+})
+AC_ATTENDED_STAGES = frozenset({
+    STAGES["ac_completed"],
+    STAGES["cd_main"], STAGES["cd_scheduled"], STAGES["cd_no_show"], STAGES["cd_completed"],
+    STAGES["hiring_recruiting"], STAGES["closed_won"],
+})
+PAID_FEE_STAGES = frozenset({
+    STAGES["hiring_recruiting"],
+    STAGES["closed_won"],
+})
+
 # ── VALIDITY / SOURCE NORMALISATION ──────────────────────────────────────────
 
 def norm_validity(raw):
@@ -207,40 +224,65 @@ def search_all_deals(filters, properties):
     return results
 
 def get_contact_deal_info(contact_ids):
-    """Batch-fetch deal associations for a list of contact IDs.
+    """Batch-fetch deal associations for a list of contact IDs (auto-batches ≤100).
     Returns {contact_id: [deal_id, ...]}"""
     if not contact_ids:
         return {}
-    # Batch associations API
-    inputs = [{"id": str(cid)} for cid in contact_ids]
-    r = requests.post(
-        f"{BASE_URL}/crm/v4/associations/contacts/deals/batch/read",
-        headers=HEADERS,
-        json={"inputs": inputs}
-    )
-    if r.status_code not in (200, 207):
-        return {}
     results = {}
-    for item in r.json().get("results", []):
-        cid = str(item.get("from", {}).get("id", ""))
-        deal_ids = [str(a.get("toObjectId", "")) for a in item.get("to", [])]
-        results[cid] = deal_ids
+    for i in range(0, len(contact_ids), 100):
+        inputs = [{"id": str(cid)} for cid in contact_ids[i:i+100]]
+        r = requests.post(
+            f"{BASE_URL}/crm/v4/associations/contacts/deals/batch/read",
+            headers=HEADERS, json={"inputs": inputs}
+        )
+        if r.status_code not in (200, 207):
+            continue
+        for item in r.json().get("results", []):
+            cid = str(item.get("from", {}).get("id", ""))
+            results[cid] = [str(a.get("toObjectId", "")) for a in item.get("to", [])]
     return results
 
 def get_deals_by_ids(deal_ids):
-    """Fetch deal details for a list of deal IDs."""
+    """Fetch deal details for a list of deal IDs (auto-batches ≤100)."""
     if not deal_ids:
         return {}
     props = ["pipeline", "dealstage", "paid_recruitment_date", "dealname", "hs_lastmodifieddate", "amount"]
-    inputs = [{"id": did} for did in deal_ids]
-    r = requests.post(
-        f"{BASE_URL}/crm/v3/objects/deals/batch/read",
-        headers=HEADERS,
-        json={"properties": props, "inputs": inputs}
-    )
-    if r.status_code not in (200, 207):
-        return {}
-    return {str(d["id"]): d.get("properties", {}) for d in r.json().get("results", [])}
+    result = {}
+    for i in range(0, len(deal_ids), 100):
+        inputs = [{"id": did} for did in deal_ids[i:i+100]]
+        r = requests.post(
+            f"{BASE_URL}/crm/v3/objects/deals/batch/read",
+            headers=HEADERS, json={"properties": props, "inputs": inputs}
+        )
+        if r.status_code not in (200, 207):
+            continue
+        for d in r.json().get("results", []):
+            result[str(d["id"])] = d.get("properties", {})
+    return result
+
+def fetch_deals_progress(contact_ids):
+    """Count BD pipeline deal stages for the given OA BD contact IDs.
+    Counts are based on each deal's current stage today."""
+    if not contact_ids:
+        return {"total": 0, "dcAttended": 0, "acAttended": 0, "paid": 0}
+
+    assoc_map    = get_contact_deal_info(contact_ids)
+    all_deal_ids = list({did for ids in assoc_map.values() for did in ids})
+    if not all_deal_ids:
+        return {"total": 0, "dcAttended": 0, "acAttended": 0, "paid": 0}
+
+    deals = get_deals_by_ids(all_deal_ids)
+    total = dc = ac = paid = 0
+    for props in deals.values():
+        if props.get("pipeline") != BD_PIPELINE_ID:
+            continue
+        total += 1
+        stage  = props.get("dealstage", "")
+        if stage in DC_ATTENDED_STAGES: dc   += 1
+        if stage in AC_ATTENDED_STAGES: ac   += 1
+        if stage in PAID_FEE_STAGES:    paid += 1
+
+    return {"total": total, "dcAttended": dc, "acAttended": ac, "paid": paid}
 
 # ── SCORING ──────────────────────────────────────────────────────────────────
 
@@ -349,7 +391,7 @@ def fetch_weekly_contacts(start, end):
             if is_valid: stats["sp_valid"] += 1
             if conn:     stats["sp_connected"] += 1
 
-    return stats
+    return stats, [c["id"] for c in contacts]
 
 # ── WEEKLY DEALS COUNT ────────────────────────────────────────────────────────
 
@@ -485,7 +527,11 @@ def fetch_monthly_contacts(num_months=6):
                         in ("valid_strict","valid_ni"))
         connected = sum(1 for c in contacts
                         if is_connected(c.get("properties",{}).get(PROP_LEAD_STATUS)))
-        print(f"{total} contacts")
+        print(f"{total} contacts", end=" ", flush=True)
+
+        contact_ids  = [c["id"] for c in contacts]
+        deals_prog   = fetch_deals_progress(contact_ids)
+        print(f"| {deals_prog['total']} deals")
 
         results.append({
             "key":         f"{y}-{m:02d}",
@@ -498,6 +544,7 @@ def fetch_monthly_contacts(num_months=6):
             "connected":   connected,
             "validRate":   round(valid_c / total * 100, 1) if total else 0.0,
             "connectRate": round(connected / total * 100, 1) if total else 0.0,
+            "dealProgress": deals_prog,
         })
 
     return results
@@ -712,24 +759,32 @@ def main():
     print("-" * 55)
 
     start, end, week_num, dates_label = current_week_range()
-    print(f"  Week {week_num}: {dates_label} ({start.date()} → {end.date()})")
+    print(f"  Week {week_num}: {dates_label} ({start.date()} to {end.date()})")
 
     # Weekly contacts
-    print("\n[1/4] Fetching weekly contact stats…")
-    stats = fetch_weekly_contacts(start, end)
+    print("\n[1/5] Fetching weekly contact stats…")
+    stats, weekly_contact_ids = fetch_weekly_contacts(start, end)
 
-    # Weekly deals count
-    print("\n[2/4] Counting deals created this week…")
+    # Weekly deals progress
+    print(f"\n[2/5] Fetching weekly deal progress ({len(weekly_contact_ids)} contacts)…")
+    weekly_deals_progress = fetch_deals_progress(weekly_contact_ids)
+    print(f"  Deals: {weekly_deals_progress['total']} total | "
+          f"{weekly_deals_progress['dcAttended']} DC | "
+          f"{weekly_deals_progress['acAttended']} AC | "
+          f"{weekly_deals_progress['paid']} Paid")
+
+    # Weekly deals count (new deals created this week — separate metric)
+    print("\n[3/5] Counting deals created this week…")
     deals_count = fetch_deals_created_count(start, end)
     print(f"  Deals created: {deals_count}")
 
     # Top 50 outreach
-    print("\n[3/5] Building top 50 outreach list…")
+    print("\n[4/5] Building top 50 outreach list…")
     top_accounts = fetch_top_50()
     print(f"  Top accounts: {len(top_accounts)}")
 
     # Paid deals
-    print("\n[4/5] Fetching Outbound Paid deals…")
+    print("\n[5/5] Fetching Outbound Paid deals + monthly data…")
     paid_deals = fetch_paid_deals()
 
     # Monthly contacts
@@ -769,6 +824,7 @@ def main():
         "spValid":           stats["sp_valid"],
         "spConnected":       stats["sp_connected"],
         "topAccounts":       top_accounts,
+        "dealProgress":      weekly_deals_progress,
     }
 
     # Patch HTML

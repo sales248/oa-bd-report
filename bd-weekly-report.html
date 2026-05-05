@@ -447,6 +447,9 @@
     <div class="nav-item" onclick="switchPage('monthly', this)">
       <span class="nav-icon">&#128197;</span> Monthly Progress
     </div>
+    <div class="nav-item" onclick="switchPage('deals', this)">
+      <span class="nav-icon">&#128200;</span> Deals Progress
+    </div>
     <hr class="sidebar-divider" />
     <div class="sidebar-label">This Week (W18)</div>
     <div class="sidebar-stat"><span>Contacts</span><strong style="color:var(--text)" id="sb-contacts">77</strong></div>
@@ -1021,6 +1024,74 @@
           </thead>
           <tbody id="monthly-table-body">
             <tr><td colspan="6" style="color:var(--muted)">Loading&hellip;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: DEALS PROGRESS ===== -->
+    <div class="page" id="page-deals">
+      <div class="section-title">Deals Progress</div>
+      <div class="section-sub">OA Business Development &middot; Deals associated with contacts, grouped by contact create date &middot; Updated <span id="deals-updated"></span></div>
+
+      <!-- Weekly deals KPI cards -->
+      <div style="font-size:14px;font-weight:600;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em">
+        This Week &mdash; <span id="dp-week-label"></span>
+      </div>
+      <div class="kpi-grid" style="margin-bottom:32px">
+        <div class="kpi-card" style="--accent-color:var(--accent)">
+          <div class="kpi-label">Total Deals</div>
+          <div class="kpi-value" style="color:var(--accent)" id="dp-total">—</div>
+          <div class="kpi-sub">In BD pipeline</div>
+        </div>
+        <div class="kpi-card" style="--accent-color:var(--cyan)">
+          <div class="kpi-label">Discovery Call Attended</div>
+          <div class="kpi-value" style="color:var(--cyan)" id="dp-dc">—</div>
+          <div class="kpi-sub" id="dp-dc-rate">of total deals</div>
+        </div>
+        <div class="kpi-card" style="--accent-color:var(--green)">
+          <div class="kpi-label">Alignment Call Attended</div>
+          <div class="kpi-value" style="color:var(--green)" id="dp-ac">—</div>
+          <div class="kpi-sub" id="dp-ac-rate">of total deals</div>
+        </div>
+        <div class="kpi-card" style="--accent-color:var(--yellow)">
+          <div class="kpi-label">Paid Recruitment Fee</div>
+          <div class="kpi-value" style="color:var(--yellow)" id="dp-paid">—</div>
+          <div class="kpi-sub" id="dp-paid-rate">of total deals</div>
+        </div>
+      </div>
+
+      <!-- Monthly deals chart -->
+      <div class="chart-card" style="margin-bottom:28px">
+        <div class="table-header">
+          <h3>Monthly Deal Volume &amp; DC Rate</h3>
+          <span class="badge badge-muted" id="deals-range-badge">Last 6 Months</span>
+        </div>
+        <canvas id="dealsTrendChart" style="max-height:280px"></canvas>
+      </div>
+
+      <!-- Monthly deals table -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Month-by-Month Deal Breakdown</h3>
+          <span class="badge badge-blue">OA Business Development</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Contacts</th>
+              <th>Total Deals</th>
+              <th>DC Attended</th>
+              <th>DC Rate</th>
+              <th>AC Attended</th>
+              <th>AC Rate</th>
+              <th>Paid Fee</th>
+              <th>Paid Rate</th>
+            </tr>
+          </thead>
+          <tbody id="deals-monthly-tbody">
+            <tr><td colspan="9" style="color:var(--muted)">Loading&hellip;</td></tr>
           </tbody>
         </table>
       </div>
@@ -2041,21 +2112,81 @@
       "topAccounts": [
         {
           "rank": 1,
-          "name": "Andres Ortner",
-          "title": "CFO",
-          "company": "Space AI, Inc",
-          "email": "andres@spaceai.com",
-          "phone": "+54 9 11 3457-4646",
+          "name": "Emma Lewis",
+          "title": "Founder & Director",
+          "company": "Pelli Bags",
+          "email": "emma@pellibags.com.au",
+          "phone": "",
           "country": "",
-          "deals": 0,
-          "tier": "ADVANCE",
-          "score": 82,
-          "why": "Cfo at space ai, inc. Connected — relationship ready, no deal yet.",
-          "action": "Create deal — send capabilities deck and schedule discovery call.",
-          "hsId": "213910262396"
+          "deals": 1,
+          "tier": "CLOSE",
+          "score": 97,
+          "why": "Founder & director at pelli bags. Connected with active deal — strong close signal.",
+          "action": "Follow up on open deal — confirm requirements and timeline to close.",
+          "hsId": "209935876532"
         },
         {
           "rank": 2,
+          "name": "Jason Knight",
+          "title": "Principal Broker/ Owner",
+          "company": "Ivie Avenue Real Estate",
+          "email": "jason@theknightgroupla.com",
+          "phone": "+115032004823",
+          "country": "",
+          "deals": 1,
+          "tier": "CLOSE",
+          "score": 97,
+          "why": "Principal broker/ owner at ivie avenue real estate. Connected with active deal — strong close signal.",
+          "action": "Follow up on open deal — confirm requirements and timeline to close.",
+          "hsId": "210976197246"
+        },
+        {
+          "rank": 3,
+          "name": "Josh Bishop",
+          "title": "Managing Director",
+          "company": "EPM ENGINEERING GROUP",
+          "email": "josh@epmengineering.co.uk",
+          "phone": "+447810820153",
+          "country": "",
+          "deals": 1,
+          "tier": "CLOSE",
+          "score": 97,
+          "why": "Managing director at epm engineering group. Connected with active deal — strong close signal.",
+          "action": "Follow up on open deal — confirm requirements and timeline to close.",
+          "hsId": "208741228080"
+        },
+        {
+          "rank": 4,
+          "name": "Josh Hunt",
+          "title": "Managing Director",
+          "company": "Brand Potential Consulting",
+          "email": "josh.hunt@brandpotential.com",
+          "phone": "+447733463137",
+          "country": "",
+          "deals": 1,
+          "tier": "CLOSE",
+          "score": 97,
+          "why": "Managing director at brand potential consulting. Connected with active deal — strong close signal.",
+          "action": "Follow up on open deal — confirm requirements and timeline to close.",
+          "hsId": "204041357623"
+        },
+        {
+          "rank": 5,
+          "name": "Sathya Shankar",
+          "title": "Chief Executive Officer",
+          "company": "Pyrumas Software Pvt Ltd",
+          "email": "sathya.shankar@pyrumas.com",
+          "phone": "+919945647223",
+          "country": "",
+          "deals": 1,
+          "tier": "CLOSE",
+          "score": 85,
+          "why": "Chief executive officer at pyrumas software pvt ltd. Connected with active deal — strong close signal.",
+          "action": "Follow up on open deal — confirm requirements and timeline to close.",
+          "hsId": "204460567450"
+        },
+        {
+          "rank": 6,
           "name": "Billy Parker",
           "title": "Executive Vice President",
           "company": "BOWA Construction",
@@ -2070,7 +2201,7 @@
           "hsId": "204094331979"
         },
         {
-          "rank": 3,
+          "rank": 7,
           "name": "David Illingworth",
           "title": "Director",
           "company": "Piledesigns Ltd",
@@ -2085,7 +2216,7 @@
           "hsId": "205829562239"
         },
         {
-          "rank": 4,
+          "rank": 8,
           "name": "Dipesh Patidar",
           "title": "Founder",
           "company": "Patidar digital hub",
@@ -2098,66 +2229,6 @@
           "why": "Founder at patidar digital hub. Connected — relationship ready, no deal yet.",
           "action": "Create deal — send capabilities deck and schedule discovery call.",
           "hsId": "204311194643"
-        },
-        {
-          "rank": 5,
-          "name": "Emma Lewis",
-          "title": "Founder & Director",
-          "company": "Pelli Bags",
-          "email": "emma@pellibags.com.au",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "ADVANCE",
-          "score": 82,
-          "why": "Founder & director at pelli bags. Connected — relationship ready, no deal yet.",
-          "action": "Create deal — send capabilities deck and schedule discovery call.",
-          "hsId": "209935876532"
-        },
-        {
-          "rank": 6,
-          "name": "Jason Knight",
-          "title": "Principal Broker/ Owner",
-          "company": "Ivie Avenue Real Estate",
-          "email": "jason@theknightgroupla.com",
-          "phone": "+115032004823",
-          "country": "",
-          "deals": 0,
-          "tier": "ADVANCE",
-          "score": 82,
-          "why": "Principal broker/ owner at ivie avenue real estate. Connected — relationship ready, no deal yet.",
-          "action": "Create deal — send capabilities deck and schedule discovery call.",
-          "hsId": "210976197246"
-        },
-        {
-          "rank": 7,
-          "name": "Josh Bishop",
-          "title": "Managing Director",
-          "company": "EPM ENGINEERING GROUP",
-          "email": "josh@epmengineering.co.uk",
-          "phone": "+447810820153",
-          "country": "",
-          "deals": 0,
-          "tier": "ADVANCE",
-          "score": 82,
-          "why": "Managing director at epm engineering group. Connected — relationship ready, no deal yet.",
-          "action": "Create deal — send capabilities deck and schedule discovery call.",
-          "hsId": "208741228080"
-        },
-        {
-          "rank": 8,
-          "name": "Josh Hunt",
-          "title": "Managing Director",
-          "company": "Brand Potential Consulting",
-          "email": "josh.hunt@brandpotential.com",
-          "phone": "+447733463137",
-          "country": "",
-          "deals": 0,
-          "tier": "ADVANCE",
-          "score": 82,
-          "why": "Managing director at brand potential consulting. Connected — relationship ready, no deal yet.",
-          "action": "Create deal — send capabilities deck and schedule discovery call.",
-          "hsId": "204041357623"
         },
         {
           "rank": 9,
@@ -2251,6 +2322,21 @@
         },
         {
           "rank": 15,
+          "name": "Taymour Israr",
+          "title": "SVP, Accounting & Finance",
+          "company": "(Individual)",
+          "email": "tisrar@terasoftwaregroup.com",
+          "phone": "",
+          "country": "",
+          "deals": 1,
+          "tier": "CLOSE",
+          "score": 75,
+          "why": "Svp, accounting & finance at (individual). Connected with active deal — strong close signal.",
+          "action": "Follow up on open deal — confirm requirements and timeline to close.",
+          "hsId": "199510172752"
+        },
+        {
+          "rank": 16,
           "name": "Anju Isenth",
           "title": "Managing Director",
           "company": "(Individual)",
@@ -2263,21 +2349,6 @@
           "why": "Managing director at (individual). Connected — relationship ready, no deal yet.",
           "action": "Create deal — send capabilities deck and schedule discovery call.",
           "hsId": "211615471123"
-        },
-        {
-          "rank": 16,
-          "name": "Sathya Shankar",
-          "title": "Chief Executive Officer",
-          "company": "Pyrumas Software Pvt Ltd",
-          "email": "sathya.shankar@pyrumas.com",
-          "phone": "+919945647223",
-          "country": "",
-          "deals": 0,
-          "tier": "ADVANCE",
-          "score": 70,
-          "why": "Chief executive officer at pyrumas software pvt ltd. Connected — relationship ready, no deal yet.",
-          "action": "Create deal — send capabilities deck and schedule discovery call.",
-          "hsId": "204460567450"
         },
         {
           "rank": 17,
@@ -2789,7 +2860,13 @@
           "action": "Assign validity first, then personalised outreach to explore business needs.",
           "hsId": "199967748981"
         }
-      ]
+      ],
+      "dealProgress": {
+        "total": 0,
+        "dcAttended": 0,
+        "acAttended": 0,
+        "paid": 0
+      }
     }
   },
   "monthly": [
@@ -2803,7 +2880,13 @@
       "valid": 64,
       "connected": 46,
       "validRate": 24.2,
-      "connectRate": 17.4
+      "connectRate": 17.4,
+      "dealProgress": {
+        "total": 33,
+        "dcAttended": 21,
+        "acAttended": 10,
+        "paid": 4
+      }
     },
     {
       "key": "2026-01",
@@ -2815,7 +2898,13 @@
       "valid": 83,
       "connected": 50,
       "validRate": 6.2,
-      "connectRate": 3.8
+      "connectRate": 3.8,
+      "dealProgress": {
+        "total": 42,
+        "dcAttended": 18,
+        "acAttended": 6,
+        "paid": 4
+      }
     },
     {
       "key": "2026-02",
@@ -2827,7 +2916,13 @@
       "valid": 160,
       "connected": 39,
       "validRate": 18.3,
-      "connectRate": 4.5
+      "connectRate": 4.5,
+      "dealProgress": {
+        "total": 26,
+        "dcAttended": 3,
+        "acAttended": 1,
+        "paid": 1
+      }
     },
     {
       "key": "2026-03",
@@ -2839,7 +2934,13 @@
       "valid": 83,
       "connected": 30,
       "validRate": 33.3,
-      "connectRate": 12.0
+      "connectRate": 12.0,
+      "dealProgress": {
+        "total": 26,
+        "dcAttended": 10,
+        "acAttended": 2,
+        "paid": 1
+      }
     },
     {
       "key": "2026-04",
@@ -2851,7 +2952,13 @@
       "valid": 53,
       "connected": 8,
       "validRate": 13.0,
-      "connectRate": 2.0
+      "connectRate": 2.0,
+      "dealProgress": {
+        "total": 8,
+        "dcAttended": 3,
+        "acAttended": 2,
+        "paid": 2
+      }
     },
     {
       "key": "2026-05",
@@ -2863,7 +2970,13 @@
       "valid": 3,
       "connected": 0,
       "validRate": 15.0,
-      "connectRate": 0.0
+      "connectRate": 0.0,
+      "dealProgress": {
+        "total": 0,
+        "dcAttended": 0,
+        "acAttended": 0,
+        "paid": 0
+      }
     }
   ]
 }
@@ -3047,6 +3160,19 @@ function renderWeek(wk) {
 
   /* Top 10 outreach */
   renderTop10(wk);
+
+  /* Deals Progress — weekly KPI cards */
+  var dp = d.dealProgress;
+  setEl('dp-week-label', d.label + ' · ' + d.dates + ', ' + d.year);
+  if (dp) {
+    setEl('dp-total', dp.total);
+    setEl('dp-dc',    dp.dcAttended);
+    setEl('dp-ac',    dp.acAttended);
+    setEl('dp-paid',  dp.paid);
+    setHTML('dp-dc-rate',   dp.total > 0 ? pct(dp.dcAttended, dp.total) + ' DC rate' : 'of total deals');
+    setHTML('dp-ac-rate',   dp.total > 0 ? pct(dp.acAttended, dp.total) + ' AC rate' : 'of total deals');
+    setHTML('dp-paid-rate', dp.total > 0 ? pct(dp.paid,        dp.total) + ' paid rate' : 'of total deals');
+  }
 }
 
 /* ── WEEK-OVER-WEEK TABLE ── */
@@ -3534,11 +3660,82 @@ function renderMonthly() {
   });
 }
 
+/* ── DEALS PROGRESS — MONTHLY ── */
+function renderDealsMonthly() {
+  setEl('deals-updated', REPORT.meta.lastUpdated);
+  var data = REPORT.monthly;
+  if (!data || !data.length) {
+    setHTML('deals-monthly-tbody', '<tr><td colspan="9" style="color:var(--muted)">No monthly data available yet.</td></tr>');
+    return;
+  }
+  if (data.length >= 2) setEl('deals-range-badge', data[0].label + ' – ' + data[data.length-1].label);
+
+  var html = '';
+  data.forEach(function(m) {
+    var dp = m.dealProgress || { total: 0, dcAttended: 0, acAttended: 0, paid: 0 };
+    var dcRate   = dp.total > 0 ? (dp.dcAttended / dp.total * 100).toFixed(1) + '%' : '—';
+    var acRate   = dp.total > 0 ? (dp.acAttended / dp.total * 100).toFixed(1) + '%' : '—';
+    var paidRate = dp.total > 0 ? (dp.paid        / dp.total * 100).toFixed(1) + '%' : '—';
+    var rowStyle = m.partial ? ' style="opacity:0.8"' : '';
+    html += '<tr' + rowStyle + '>';
+    html += '<td><strong>' + m.label + (m.partial ? ' <span style="color:var(--muted);font-size:11px">(partial)</span>' : '') + '</strong></td>';
+    html += '<td>' + m.contacts + '</td>';
+    html += '<td style="font-weight:600">' + dp.total + '</td>';
+    html += '<td>' + dp.dcAttended + '</td>';
+    html += '<td style="color:var(--cyan)">' + dcRate + '</td>';
+    html += '<td>' + dp.acAttended + '</td>';
+    html += '<td style="color:var(--green)">' + acRate + '</td>';
+    html += '<td>' + dp.paid + '</td>';
+    html += '<td style="color:var(--yellow)">' + paidRate + '</td>';
+    html += '</tr>';
+  });
+  document.getElementById('deals-monthly-tbody').innerHTML = html;
+
+  var ctx = document.getElementById('dealsTrendChart');
+  if (!ctx) return;
+  if (charts.deals) charts.deals.destroy();
+  charts.deals = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(function(m){ return m.label; }),
+      datasets: [
+        { label: 'Total Deals',  data: data.map(function(m){ return (m.dealProgress||{}).total       || 0; }),
+          backgroundColor: 'rgba(79,110,247,0.7)', borderColor: '#4f6ef7', borderWidth: 1, yAxisID: 'y' },
+        { label: 'DC Attended',  data: data.map(function(m){ return (m.dealProgress||{}).dcAttended  || 0; }),
+          backgroundColor: 'rgba(6,182,212,0.7)',  borderColor: '#06b6d4', borderWidth: 1, yAxisID: 'y' },
+        { label: 'AC Attended',  data: data.map(function(m){ return (m.dealProgress||{}).acAttended  || 0; }),
+          backgroundColor: 'rgba(34,197,94,0.7)',  borderColor: '#22c55e', borderWidth: 1, yAxisID: 'y' },
+        { label: 'Paid Fee',     data: data.map(function(m){ return (m.dealProgress||{}).paid        || 0; }),
+          backgroundColor: 'rgba(245,158,11,0.7)', borderColor: '#f59e0b', borderWidth: 1, yAxisID: 'y' },
+        { label: 'DC Rate %',    data: data.map(function(m){
+            var dp = m.dealProgress || {}; return dp.total > 0 ? +(dp.dcAttended / dp.total * 100).toFixed(1) : 0;
+          }),
+          type: 'line', borderColor: '#06b6d4', backgroundColor: 'rgba(6,182,212,0.08)',
+          pointBackgroundColor: '#06b6d4', tension: 0.4, yAxisID: 'y2' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { labels: { color: '#94a3b8', font: FONT } } },
+      scales: {
+        x:  { ticks: { color: '#64748b', font: FONT }, grid: { color: GRID } },
+        y:  { position: 'left',  ticks: { color: '#64748b', font: FONT }, grid: { color: GRID },
+              title: { display: true, text: 'Deals', color: '#64748b', font: FONT } },
+        y2: { position: 'right', min: 0, max: 100,
+              ticks: { color: '#06b6d4', font: FONT, callback: function(v){ return v + '%'; } },
+              grid: { drawOnChartArea: false },
+              title: { display: true, text: 'DC Rate', color: '#06b6d4', font: FONT } }
+      }
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   buildCharts();
   renderWeek(currentWeek);
   renderPaidDeals();
   renderMonthly();
+  renderDealsMonthly();
 });
 </script>
 
