@@ -516,14 +516,14 @@
       <div class="table-card">
         <div class="table-header">
           <h3>Week-over-Week Comparison</h3>
-          <span class="badge badge-muted">W16 vs W17</span>
+          <span class="badge badge-muted" id="wow-badge">W16 vs W17</span>
         </div>
         <table>
           <thead>
             <tr>
               <th>Metric</th>
-              <th>W16 (Apr 15&ndash;21)</th>
-              <th>W17 (Apr 22&ndash;28)</th>
+              <th id="wow-th-prev">W16 (Apr 15&ndash;21)</th>
+              <th id="wow-th-curr">W17 (Apr 22&ndash;28)</th>
               <th>Change</th>
             </tr>
           </thead>
@@ -572,22 +572,22 @@
         </div>
         <table>
           <thead>
-            <tr><th>Stage Transition</th><th>From</th><th>To</th><th>Rate</th><th>W16</th><th>Trend</th></tr>
+            <tr><th>Stage Transition</th><th>From</th><th>To</th><th>Rate</th><th id="ft-prev-label">Prev</th><th>Trend</th></tr>
           </thead>
           <tbody id="funnel-table-body">
             <tr>
               <td><strong>Contact &rarr; Valid</strong></td>
               <td id="ft-c">77</td><td id="ft-v">9</td>
               <td style="color:var(--red);font-weight:700" id="ft-cv">11.7%</td>
-              <td style="color:var(--muted)">14.2%</td>
-              <td><span class="badge badge-red">&#9660; 2.5pp</span></td>
+              <td style="color:var(--muted)" id="ft-prev-cv">—</td>
+              <td id="ft-trend-cv"><span class="badge badge-muted">—</span></td>
             </tr>
             <tr>
               <td><strong>Valid &rarr; Connected</strong></td>
               <td id="ft-v2">9</td><td id="ft-conn">2</td>
               <td style="color:var(--yellow);font-weight:700" id="ft-vc">22.2%</td>
-              <td style="color:var(--muted)">11.8%</td>
-              <td><span class="badge badge-green">&#9650; +88%</span></td>
+              <td style="color:var(--muted)" id="ft-prev-vc">—</td>
+              <td id="ft-trend-vc"><span class="badge badge-muted">—</span></td>
             </tr>
             <tr>
               <td><strong>Connected &rarr; Deal</strong></td>
@@ -600,8 +600,8 @@
               <td><strong>Overall Contact &rarr; Connected</strong></td>
               <td id="ft-tot">77</td><td id="ft-conn3">2</td>
               <td style="color:var(--muted);font-weight:700" id="ft-oc">2.6%</td>
-              <td style="color:var(--muted)">1.7%</td>
-              <td><span class="badge badge-green">&#9650; +53%</span></td>
+              <td style="color:var(--muted)" id="ft-prev-oc">—</td>
+              <td id="ft-trend-oc"><span class="badge badge-muted">—</span></td>
             </tr>
           </tbody>
         </table>
@@ -609,7 +609,7 @@
 
       <!-- FUNNEL COMPARISON CHART -->
       <div class="chart-card" style="margin-bottom:28px">
-        <h3>Funnel Comparison &mdash; W16 vs W17</h3>
+        <h3 id="funnel-cmp-title">Funnel Comparison &mdash; W16 vs W17</h3>
         <canvas id="funnelCompChart" style="max-height:240px"></canvas>
       </div>
     </div>
@@ -699,7 +699,7 @@
       <div class="table-card">
         <div class="table-header"><h3>Source Mix &mdash; Week-over-Week</h3></div>
         <table>
-          <thead><tr><th>Source</th><th>W16 Volume</th><th>W17 Volume</th><th>W16 Valid%</th><th>W17 Valid%</th><th>W16 Connect%</th><th>W17 Connect%</th></tr></thead>
+          <thead><tr><th>Source</th><th id="src-wow-th-pv">Prev Vol</th><th id="src-wow-th-cv">Curr Vol</th><th id="src-wow-th-pvp">Prev Valid%</th><th id="src-wow-th-cvp">Curr Valid%</th><th id="src-wow-th-pcp">Prev Conn%</th><th id="src-wow-th-ccp">Curr Conn%</th></tr></thead>
           <tbody id="sources-wow-body">
             <tr>
               <td><strong>Inbound</strong></td>
@@ -4032,11 +4032,129 @@ function renderWeek(wk) {
     'Clean the top of the funnel before optimising downstream.'
   );
 
+  /* WoW comparison tables */
+  renderWoW(wk);
+  renderSourceWoW(wk);
+
   /* Update charts */
   updateCharts(wk);
 
   /* Top 10 outreach */
   renderTop10(wk);
+}
+
+/* ── WEEK-OVER-WEEK TABLE ── */
+function renderWoW(wk) {
+  var d = REPORT.weeks[wk];
+  var prev = REPORT.weeks[wk - 1];
+  if (!d) return;
+
+  var label = prev ? (prev.label + ' vs ' + d.label) : d.label;
+  setEl('wow-badge', label);
+  setEl('wow-th-curr', d.label + ' (' + d.dates + ')');
+  setEl('wow-th-prev', prev ? (prev.label + ' (' + prev.dates + ')') : 'Prev Week');
+  setEl('funnel-cmp-title', 'Funnel Comparison — ' + label);
+
+  if (!prev) {
+    setHTML('wow-table-body', '<tr><td colspan="4" style="color:var(--muted)">No previous week data available.</td></tr>');
+    return;
+  }
+
+  function ppDiff(a, b) {
+    var diff = (a - b).toFixed(1);
+    return (diff >= 0 ? '+' : '') + diff + 'pp';
+  }
+  function badgeCls(val, ispp) {
+    var n = parseFloat(val);
+    if (isNaN(n)) return 'badge-muted';
+    if (n > 0) return 'badge-green';
+    if (n < (ispp ? -3 : -20)) return 'badge-red';
+    return 'badge-yellow';
+  }
+  function arrow(n) { return n >= 0 ? '&#9650; ' : '&#9660; '; }
+
+  var prevCVpct = prev.contacts ? prev.valid / prev.contacts * 100 : 0;
+  var currCVpct = d.contacts    ? d.valid    / d.contacts    * 100 : 0;
+  var prevVCpct = prev.valid    ? prev.connected / prev.valid * 100 : 0;
+  var currVCpct = d.valid       ? d.connected / d.valid       * 100 : 0;
+
+  var rows = [
+    { label: 'Total Contacts',       pv: prev.contacts, cv: d.contacts,  ch: delta(d.contacts,  prev.contacts),  pp: false },
+    { label: 'Valid Leads',          pv: prev.valid,    cv: d.valid,     ch: delta(d.valid,     prev.valid),     pp: false },
+    { label: 'Valid Rate',           pv: prevCVpct.toFixed(1)+'%', cv: currCVpct.toFixed(1)+'%', ch: ppDiff(currCVpct, prevCVpct), pp: true },
+    { label: 'Connected',            pv: prev.connected, cv: d.connected, ch: prev.connected === d.connected ? '= Flat' : delta(d.connected, prev.connected), pp: false },
+    { label: 'Valid→Connected Rate', pv: prevVCpct.toFixed(1)+'%', cv: currVCpct.toFixed(1)+'%', ch: ppDiff(currVCpct, prevVCpct), pp: true },
+    { label: 'Deals Created',        pv: prev.deals,    cv: d.deals,     ch: delta(d.deals,     prev.deals),     pp: false },
+  ];
+
+  var html = '';
+  rows.forEach(function(r) {
+    var n = parseFloat(r.ch);
+    var cls = r.ch === '= Flat' ? 'badge-yellow' : badgeCls(r.ch, r.pp);
+    var lbl = r.ch === '= Flat' ? '= Flat' : (isNaN(n) ? r.ch : arrow(n) + r.ch);
+    html += '<tr><td>' + r.label + '</td><td>' + r.pv + '</td><td>' + r.cv + '</td>';
+    html += '<td><span class="badge ' + cls + '">' + lbl + '</span></td></tr>';
+  });
+  document.getElementById('wow-table-body').innerHTML = html;
+
+  /* Funnel conversion prev-week column */
+  setEl('ft-prev-label', prev.label);
+  setEl('ft-prev-cv', prevCVpct.toFixed(1) + '%');
+  setEl('ft-prev-vc', prevVCpct.toFixed(1) + '%');
+  var prevOCpct = prev.contacts ? prev.connected / prev.contacts * 100 : 0;
+  var currOCpct = d.contacts    ? d.connected    / d.contacts    * 100 : 0;
+  setEl('ft-prev-oc', prevOCpct.toFixed(1) + '%');
+
+  function trendBadge(curr, prev, ispp) {
+    var diff = curr - prev;
+    var cls = diff === 0 ? 'badge-yellow' : (diff > 0 ? 'badge-green' : (Math.abs(diff) > (ispp ? 3 : 20) ? 'badge-red' : 'badge-yellow'));
+    var lbl = diff === 0 ? '= Flat' : (diff > 0 ? '&#9650; +' : '&#9660; ') + Math.abs(diff).toFixed(1) + (ispp ? 'pp' : '%');
+    return '<span class="badge ' + cls + '">' + lbl + '</span>';
+  }
+  setHTML('ft-trend-cv', trendBadge(currCVpct, prevCVpct, true));
+  setHTML('ft-trend-vc', trendBadge(currVCpct, prevVCpct, true));
+  setHTML('ft-trend-oc', trendBadge(currOCpct, prevOCpct, true));
+}
+
+/* ── SOURCE WoW TABLE ── */
+function renderSourceWoW(wk) {
+  var d = REPORT.weeks[wk];
+  var prev = REPORT.weeks[wk - 1];
+  if (!d) return;
+
+  var pl = prev ? prev.label : 'Prev';
+  var cl = d.label;
+  setEl('src-wow-th-pv',  pl + ' Vol');
+  setEl('src-wow-th-cv',  cl + ' Vol');
+  setEl('src-wow-th-pvp', pl + ' Valid%');
+  setEl('src-wow-th-cvp', cl + ' Valid%');
+  setEl('src-wow-th-pcp', pl + ' Conn%');
+  setEl('src-wow-th-ccp', cl + ' Conn%');
+
+  if (!prev) {
+    setHTML('sources-wow-body', '<tr><td colspan="7" style="color:var(--muted)">No previous week data available.</td></tr>');
+    return;
+  }
+
+  var rows = [
+    { name: 'Inbound',  pVol: prev.inbound,  cVol: d.inbound,  pVal: prev.inboundValid,  cVal: d.inboundValid,  pConn: prev.inboundConnected,  cConn: d.inboundConnected  },
+    { name: 'Outbound', pVol: prev.outbound, cVol: d.outbound, pVal: prev.outboundValid, cVal: d.outboundValid, pConn: prev.outboundConnected, cConn: d.outboundConnected },
+    { name: 'SP',       pVol: prev.sp,       cVol: d.sp,       pVal: prev.spValid,       cVal: d.spValid,       pConn: prev.spConnected,       cConn: d.spConnected       },
+  ];
+
+  var html = '';
+  rows.forEach(function(r) {
+    var pVPct = r.pVol ? (r.pVal / r.pVol * 100).toFixed(1) + '%' : '—';
+    var cVPct = r.cVol ? (r.cVal / r.cVol * 100).toFixed(1) + '%' : '—';
+    var pCPct = r.pVol ? (r.pConn / r.pVol * 100).toFixed(1) + '%' : '—';
+    var cCPct = r.cVol ? (r.cConn / r.cVol * 100).toFixed(1) + '%' : '—';
+    html += '<tr><td><strong>' + r.name + '</strong></td>';
+    html += '<td>' + (r.pVol || 0) + '</td><td>' + (r.cVol || 0) + '</td>';
+    html += '<td>' + pVPct + '</td><td style="color:var(--cyan)">' + cVPct + '</td>';
+    html += '<td>' + pCPct + '</td><td style="color:var(--green)">' + cCPct + '</td>';
+    html += '</tr>';
+  });
+  document.getElementById('sources-wow-body').innerHTML = html;
 }
 
 /* ── FUNNEL RENDERER ── */
