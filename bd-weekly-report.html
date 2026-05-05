@@ -444,6 +444,9 @@
     <div class="nav-item" onclick="switchPage('paid', this)">
       <span class="nav-icon">&#128176;</span> Paid Outbound
     </div>
+    <div class="nav-item" onclick="switchPage('monthly', this)">
+      <span class="nav-icon">&#128197;</span> Monthly Progress
+    </div>
     <hr class="sidebar-divider" />
     <div class="sidebar-label">This Week (W18)</div>
     <div class="sidebar-stat"><span>Contacts</span><strong style="color:var(--text)" id="sb-contacts">77</strong></div>
@@ -984,6 +987,42 @@
       <!-- DEAL GROUPS (JS-rendered) -->
       <div id="pd-deal-list">
         <div class="outreach-no-data">Loading&hellip;</div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: MONTHLY PROGRESS ===== -->
+    <div class="page" id="page-monthly">
+      <div class="section-title">Monthly Contacts Progress</div>
+      <div class="section-sub">OA Business Development &middot; Contacts created per month &middot; Updated <span id="monthly-updated"></span></div>
+
+      <div class="chart-card" style="margin-bottom:28px">
+        <div class="table-header">
+          <h3>Monthly Contact Volume &amp; Valid Rate</h3>
+          <span class="badge badge-muted" id="monthly-range-badge">Last 6 Months</span>
+        </div>
+        <canvas id="monthlyTrendChart" style="max-height:280px"></canvas>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Month-by-Month Breakdown</h3>
+          <span class="badge badge-blue">OA Business Development</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Total Contacts</th>
+              <th>Valid Leads</th>
+              <th>Valid Rate</th>
+              <th>Connected</th>
+              <th>vs Prior Month</th>
+            </tr>
+          </thead>
+          <tbody id="monthly-table-body">
+            <tr><td colspan="6" style="color:var(--muted)">Loading&hellip;</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -1976,7 +2015,7 @@
       "year": 2026,
       "startDate": "2026-04-29",
       "endDate": "2026-05-05",
-      "contacts": 27,
+      "contacts": 28,
       "valid": 5,
       "validStrict": 5,
       "validNI": 0,
@@ -1986,10 +2025,10 @@
       "dealsAll": 0,
       "spam": 13,
       "jobseekers": 4,
-      "serviceProviders": 3,
+      "serviceProviders": 4,
       "unqualified": 1,
       "noValidity": 1,
-      "inbound": 26,
+      "inbound": 27,
       "outbound": 0,
       "sp": 0,
       "other": 1,
@@ -2017,6 +2056,51 @@
         },
         {
           "rank": 2,
+          "name": "Billy Parker",
+          "title": "Executive Vice President",
+          "company": "BOWA Construction",
+          "email": "bparker@thebowagroup.com",
+          "phone": "+13124047574",
+          "country": "",
+          "deals": 0,
+          "tier": "ADVANCE",
+          "score": 82,
+          "why": "Executive vice president at bowa construction. Connected — relationship ready, no deal yet.",
+          "action": "Create deal — send capabilities deck and schedule discovery call.",
+          "hsId": "204094331979"
+        },
+        {
+          "rank": 3,
+          "name": "David Illingworth",
+          "title": "Director",
+          "company": "Piledesigns Ltd",
+          "email": "david.illingworth@piledesigns.co.uk",
+          "phone": "",
+          "country": "",
+          "deals": 0,
+          "tier": "ADVANCE",
+          "score": 82,
+          "why": "Director at piledesigns ltd. Connected — relationship ready, no deal yet.",
+          "action": "Create deal — send capabilities deck and schedule discovery call.",
+          "hsId": "205829562239"
+        },
+        {
+          "rank": 4,
+          "name": "Dipesh Patidar",
+          "title": "Founder",
+          "company": "Patidar digital hub",
+          "email": "patidardipesh58@gmail.com",
+          "phone": "+9109589484361",
+          "country": "",
+          "deals": 0,
+          "tier": "ADVANCE",
+          "score": 82,
+          "why": "Founder at patidar digital hub. Connected — relationship ready, no deal yet.",
+          "action": "Create deal — send capabilities deck and schedule discovery call.",
+          "hsId": "204311194643"
+        },
+        {
+          "rank": 5,
           "name": "Emma Lewis",
           "title": "Founder & Director",
           "company": "Pelli Bags",
@@ -2031,37 +2115,97 @@
           "hsId": "209935876532"
         },
         {
-          "rank": 3,
-          "name": "Anthony Grey",
-          "title": "Client Director - Strategic Accounts",
-          "company": "FUJIFILM Business Innovation Australia",
-          "email": "anthony.grey@fujifilm.com",
+          "rank": 6,
+          "name": "Jason Knight",
+          "title": "Principal Broker/ Owner",
+          "company": "Ivie Avenue Real Estate",
+          "email": "jason@theknightgroupla.com",
+          "phone": "+115032004823",
+          "country": "",
+          "deals": 0,
+          "tier": "ADVANCE",
+          "score": 82,
+          "why": "Principal broker/ owner at ivie avenue real estate. Connected — relationship ready, no deal yet.",
+          "action": "Create deal — send capabilities deck and schedule discovery call.",
+          "hsId": "210976197246"
+        },
+        {
+          "rank": 7,
+          "name": "Josh Bishop",
+          "title": "Managing Director",
+          "company": "EPM ENGINEERING GROUP",
+          "email": "josh@epmengineering.co.uk",
+          "phone": "+447810820153",
+          "country": "",
+          "deals": 0,
+          "tier": "ADVANCE",
+          "score": 82,
+          "why": "Managing director at epm engineering group. Connected — relationship ready, no deal yet.",
+          "action": "Create deal — send capabilities deck and schedule discovery call.",
+          "hsId": "208741228080"
+        },
+        {
+          "rank": 8,
+          "name": "Josh Hunt",
+          "title": "Managing Director",
+          "company": "Brand Potential Consulting",
+          "email": "josh.hunt@brandpotential.com",
+          "phone": "+447733463137",
+          "country": "",
+          "deals": 0,
+          "tier": "ADVANCE",
+          "score": 82,
+          "why": "Managing director at brand potential consulting. Connected — relationship ready, no deal yet.",
+          "action": "Create deal — send capabilities deck and schedule discovery call.",
+          "hsId": "204041357623"
+        },
+        {
+          "rank": 9,
+          "name": "Matt Rickard",
+          "title": "Director of Business Development",
+          "company": "Oaktree Interiors",
+          "email": "matt@oaktreeoffice.com",
           "phone": "",
           "country": "",
           "deals": 0,
-          "tier": "PROSPECT",
-          "score": 75,
-          "why": "Client director - strategic accounts at fujifilm business innovation australia. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214397251999"
+          "tier": "ADVANCE",
+          "score": 82,
+          "why": "Director of business development at oaktree interiors. Connected — relationship ready, no deal yet.",
+          "action": "Create deal — send capabilities deck and schedule discovery call.",
+          "hsId": "205832002449"
         },
         {
-          "rank": 4,
-          "name": "Daniel Farrugia",
-          "title": "Strategic Account Director",
-          "company": "FUJIFILM Business Innovation Australia",
-          "email": "daniel.farrugia.tm@fujifilm.com",
+          "rank": 10,
+          "name": "Michael Tietjen",
+          "title": "Vice President of Sales and Marketing",
+          "company": "Dynamic, Inc",
+          "email": "mtietjen@dynamicagency.com",
+          "phone": "+1 414-698-7281",
+          "country": "",
+          "deals": 0,
+          "tier": "ADVANCE",
+          "score": 82,
+          "why": "Vice president of sales and marketing at dynamic, inc. Connected — relationship ready, no deal yet.",
+          "action": "Create deal — send capabilities deck and schedule discovery call.",
+          "hsId": "199950908029"
+        },
+        {
+          "rank": 11,
+          "name": "Paul McCabe",
+          "title": "Company Co-Founder & Co-Owner",
+          "company": "Design Foundry MEP Ltd",
+          "email": "paulmccabe@design-foundry.co.uk",
           "phone": "",
           "country": "",
           "deals": 0,
-          "tier": "PROSPECT",
-          "score": 75,
-          "why": "Strategic account director at fujifilm business innovation australia. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214400553875"
+          "tier": "ADVANCE",
+          "score": 82,
+          "why": "Company co-founder & co-owner at design foundry mep ltd. Connected — relationship ready, no deal yet.",
+          "action": "Create deal — send capabilities deck and schedule discovery call.",
+          "hsId": "205835413428"
         },
         {
-          "rank": 5,
+          "rank": 12,
           "name": "George Garcia",
           "title": "Vice President Corporate Sales",
           "company": "Patterson Companies",
@@ -2076,112 +2220,67 @@
           "hsId": "199949494018"
         },
         {
-          "rank": 6,
-          "name": "Graham Ford",
-          "title": "CFO",
-          "company": "FUJIFILM Business Innovation Australia",
-          "email": "graham@epicenter.tv",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 75,
-          "why": "Cfo at fujifilm business innovation australia. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214401282999"
-        },
-        {
-          "rank": 7,
-          "name": "Mac Alexander",
-          "title": "Strategic Account Director",
-          "company": "FUJIFILM Business Innovation Australia",
-          "email": "mac.alexander.vq@fujifilm.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 75,
-          "why": "Strategic account director at fujifilm business innovation australia. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214399752601"
-        },
-        {
-          "rank": 8,
-          "name": "Paul Cannon",
-          "title": "Metro Business Director - Master Agent",
-          "company": "FUJIFILM Business Innovation Australia",
-          "email": "paul.cannon@fujifilm.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 75,
-          "why": "Metro business director - master agent at fujifilm business innovation australia. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214397252001"
-        },
-        {
-          "rank": 9,
-          "name": "Paul Winter",
-          "title": "Client Director",
-          "company": "FUJIFILM Business Innovation Australia",
-          "email": "paul.winter.wt@fujifilm.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 75,
-          "why": "Client director at fujifilm business innovation australia. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214395534353"
-        },
-        {
-          "rank": 10,
-          "name": "Shuva Chowdhury",
-          "title": "Strategic Client Director",
-          "company": "FUJIFILM Business Innovation Australia",
-          "email": "shuva.chowdhury.un@fujifilm.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 75,
-          "why": "Strategic client director at fujifilm business innovation australia. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214407179110"
-        },
-        {
-          "rank": 11,
-          "name": "Tony Figliola",
-          "title": "Metro Business Director",
-          "company": "FUJIFILM Business Innovation Australia",
-          "email": "tony.figliola.qr@fujifilm.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 75,
-          "why": "Metro business director at fujifilm business innovation australia. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214395666025"
-        },
-        {
-          "rank": 12,
-          "name": "A M",
-          "title": "Director - Client Relationship Management",
-          "company": "Principal Asset Management",
-          "email": "moubset.atika@principal.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 67,
-          "why": "Director - client relationship management at principal asset management. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214396251993"
-        },
-        {
           "rank": 13,
+          "name": "Hector Nevarez",
+          "title": "Owner",
+          "company": "Gabriel de Armero - Today Sothebyâ€™s",
+          "email": "hector@gabrieldearmero.com",
+          "phone": "",
+          "country": "",
+          "deals": 0,
+          "tier": "PROSPECT",
+          "score": 75,
+          "why": "Owner at gabriel de armero - today sothebyâ€™s. Valid bd lead — initial outreach stage.",
+          "action": "Assign validity first, then personalised outreach to explore business needs.",
+          "hsId": "199967585960"
+        },
+        {
+          "rank": 14,
+          "name": "Kathy Kelley",
+          "title": "Vice President",
+          "company": "Berkshire Hathaway HomeServices Town and Country Real Estate",
+          "email": "kathy@bhhsbaystatehomes.com",
+          "phone": "",
+          "country": "",
+          "deals": 0,
+          "tier": "PROSPECT",
+          "score": 75,
+          "why": "Vice president at berkshire hathaway homeservices town and country real estate. Valid bd lead — initial outreach stage.",
+          "action": "Assign validity first, then personalised outreach to explore business needs.",
+          "hsId": "199835498127"
+        },
+        {
+          "rank": 15,
+          "name": "Anju Isenth",
+          "title": "Managing Director",
+          "company": "(Individual)",
+          "email": "casacommunityau@gmail.com",
+          "phone": "+91 8921538130",
+          "country": "",
+          "deals": 0,
+          "tier": "ADVANCE",
+          "score": 72,
+          "why": "Managing director at (individual). Connected — relationship ready, no deal yet.",
+          "action": "Create deal — send capabilities deck and schedule discovery call.",
+          "hsId": "211615471123"
+        },
+        {
+          "rank": 16,
+          "name": "Sathya Shankar",
+          "title": "Chief Executive Officer",
+          "company": "Pyrumas Software Pvt Ltd",
+          "email": "sathya.shankar@pyrumas.com",
+          "phone": "+919945647223",
+          "country": "",
+          "deals": 0,
+          "tier": "ADVANCE",
+          "score": 70,
+          "why": "Chief executive officer at pyrumas software pvt ltd. Connected — relationship ready, no deal yet.",
+          "action": "Create deal — send capabilities deck and schedule discovery call.",
+          "hsId": "204460567450"
+        },
+        {
+          "rank": 17,
           "name": "AJ Davidson",
           "title": "President",
           "company": "Bivouac Ann Arbor",
@@ -2196,37 +2295,7 @@
           "hsId": "199950741655"
         },
         {
-          "rank": 14,
-          "name": "AJ Katana",
-          "title": "CEO",
-          "company": "Entertainment AI",
-          "email": "aj@agency.org.uk",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 67,
-          "why": "Ceo at entertainment ai. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214312570806"
-        },
-        {
-          "rank": 15,
-          "name": "AJ O'Leary",
-          "title": "Program Director",
-          "company": "H+K International",
-          "email": "aj.oleary@hki.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 67,
-          "why": "Program director at h+k international. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214396207246"
-        },
-        {
-          "rank": 16,
+          "rank": 18,
           "name": "AJ Warne",
           "title": "Vice President of Sales and Marketing",
           "company": "Abraham Linc",
@@ -2241,7 +2310,7 @@
           "hsId": "199944142994"
         },
         {
-          "rank": 17,
+          "rank": 19,
           "name": "Aali Alizadeh",
           "title": "Co-Founder | President and CTO",
           "company": "Giatec",
@@ -2256,22 +2325,7 @@
           "hsId": "199933469008"
         },
         {
-          "rank": 18,
-          "name": "Aaron Adams",
-          "title": "Managing Director",
-          "company": "Moss Adams",
-          "email": "aaron.adams@mossadams.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 67,
-          "why": "Managing director at moss adams. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214397680241"
-        },
-        {
-          "rank": 19,
+          "rank": 20,
           "name": "Aaron Beadle",
           "title": "Director of IT & Technical Services",
           "company": "Data Energy",
@@ -2286,37 +2340,7 @@
           "hsId": "199944281862"
         },
         {
-          "rank": 20,
-          "name": "Aaron Bernabi",
-          "title": "President | Project Manager (Remote)",
-          "company": "Logoworks",
-          "email": "aaron@logoworks.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 67,
-          "why": "President | project manager (remote) at logoworks. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214400044862"
-        },
-        {
           "rank": 21,
-          "name": "Aaron Blackfelner",
-          "title": "Senior Vice President - Private Client Advisor",
-          "company": "Bank of America Private Bank",
-          "email": "aaron.blackfelner@bofa.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 67,
-          "why": "Senior vice president - private client advisor at bank of america private bank. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214398374252"
-        },
-        {
-          "rank": 22,
           "name": "Aaron Breeden",
           "title": "Managing Director",
           "company": "EDJ Mechanical Services Ltd",
@@ -2331,7 +2355,7 @@
           "hsId": "199950495519"
         },
         {
-          "rank": 23,
+          "rank": 22,
           "name": "Aaron Brosch",
           "title": "President",
           "company": "All American Gutter Protection",
@@ -2346,22 +2370,22 @@
           "hsId": "199830563190"
         },
         {
-          "rank": 24,
-          "name": "Aaron Byers",
-          "title": "Key Accounts Director",
-          "company": "Elastic",
-          "email": "aaron.byers@elastic.co",
+          "rank": 23,
+          "name": "Aaron Cohen",
+          "title": "Co-Founder & Head of Revenue",
+          "company": "BenefitFlow",
+          "email": "aaron@benefit-flow.com",
           "phone": "",
           "country": "",
           "deals": 0,
           "tier": "PROSPECT",
           "score": 67,
-          "why": "Key accounts director at elastic. Valid bd lead — initial outreach stage.",
+          "why": "Co-founder & head of revenue at benefitflow. Valid bd lead — initial outreach stage.",
           "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214395923350"
+          "hsId": "199948681655"
         },
         {
-          "rank": 25,
+          "rank": 24,
           "name": "Aaron Cox",
           "title": "Vice President of Operations",
           "company": "Corby Energy Services Inc.",
@@ -2376,19 +2400,34 @@
           "hsId": "199933510482"
         },
         {
-          "rank": 26,
-          "name": "Aaron Dalley",
-          "title": "Director of Fixed Operations - Pacific Region",
-          "company": "Volkswagen of America, Inc",
-          "email": "aaron.dalley@vw.com",
+          "rank": 25,
+          "name": "Aaron Drussel",
+          "title": "Principal Broker/ Owner",
+          "company": "betterutahliving.com",
+          "email": "aaron@betterutahliving.com",
           "phone": "",
           "country": "",
           "deals": 0,
           "tier": "PROSPECT",
           "score": 67,
-          "why": "Director of fixed operations - pacific region at volkswagen of america, inc. Valid bd lead — initial outreach stage.",
+          "why": "Principal broker/ owner at betterutahliving.com. Valid bd lead — initial outreach stage.",
           "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "207177541497"
+          "hsId": "199945503064"
+        },
+        {
+          "rank": 26,
+          "name": "Aaron Fisher",
+          "title": "Commercial Director",
+          "company": "Magnum Properties",
+          "email": "aaron@magnumproperties.co.uk",
+          "phone": "",
+          "country": "",
+          "deals": 0,
+          "tier": "PROSPECT",
+          "score": 67,
+          "why": "Commercial director at magnum properties. Valid bd lead — initial outreach stage.",
+          "action": "Assign validity first, then personalised outreach to explore business needs.",
+          "hsId": "199949325839"
         },
         {
           "rank": 27,
@@ -2437,21 +2476,6 @@
         },
         {
           "rank": 30,
-          "name": "Aaron Halvorson",
-          "title": "Quality Director",
-          "company": "IRISNDT",
-          "email": "aaron.halvorson@irisndt.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 67,
-          "why": "Quality director at irisndt. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214399321224"
-        },
-        {
-          "rank": 31,
           "name": "Aaron Hammer",
           "title": "Vice President / General Manager",
           "company": "HB Aerospace",
@@ -2466,7 +2490,7 @@
           "hsId": "199858637132"
         },
         {
-          "rank": 32,
+          "rank": 31,
           "name": "Aaron Heller",
           "title": "Vice President",
           "company": "Sound Point Capital Management, LP",
@@ -2481,52 +2505,37 @@
           "hsId": "199218383703"
         },
         {
-          "rank": 33,
-          "name": "Aaron Helms",
-          "title": "Regional Sales Director",
-          "company": "Cessna Aircraft Company",
-          "email": "ahelms@txtav.com",
+          "rank": 32,
+          "name": "Aaron Horvath",
+          "title": "Senior Vice President, Product & Marketing Strategy",
+          "company": "Mobilize Solutions",
+          "email": "aaron@mobilize.solutions",
           "phone": "",
           "country": "",
           "deals": 0,
           "tier": "PROSPECT",
           "score": 67,
-          "why": "Regional sales director at cessna aircraft company. Valid bd lead — initial outreach stage.",
+          "why": "Senior vice president, product & marketing strategy at mobilize solutions. Valid bd lead — initial outreach stage.",
           "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "207123089412"
+          "hsId": "212999380073"
+        },
+        {
+          "rank": 33,
+          "name": "Aaron Karas",
+          "title": "Founder/ Fiduciary",
+          "company": "Qb1 Advsiors LLC",
+          "email": "aaron@qb1advisors.com",
+          "phone": "",
+          "country": "",
+          "deals": 0,
+          "tier": "QUALIFY",
+          "score": 67,
+          "why": "Founder/ fiduciary at qb1 advsiors llc. Valid bd lead — initial outreach stage.",
+          "action": "Schedule discovery call — explore outsourcing needs and qualify role.",
+          "hsId": "209752557962"
         },
         {
           "rank": 34,
-          "name": "Aaron Holquin",
-          "title": "Director, Corporate FP&A",
-          "company": "Arctera",
-          "email": "aaron.holquin@arctera.io",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 67,
-          "why": "Director, corporate fp&a at arctera. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214396276364"
-        },
-        {
-          "rank": 35,
-          "name": "Aaron Kimball",
-          "title": "Agency Director",
-          "company": "Bankers Life",
-          "email": "aaron.kimball@bankerslife.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 67,
-          "why": "Agency director at bankers life. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "207175822625"
-        },
-        {
-          "rank": 36,
           "name": "Aaron Lamb",
           "title": "Director of Sales and Marketing",
           "company": "Microspot Limited",
@@ -2541,7 +2550,7 @@
           "hsId": "199267497988"
         },
         {
-          "rank": 37,
+          "rank": 35,
           "name": "Aaron McAleer",
           "title": "Director of Operations",
           "company": "Plan & Prosper",
@@ -2556,22 +2565,7 @@
           "hsId": "199273210773"
         },
         {
-          "rank": 38,
-          "name": "Aaron McAuliffe",
-          "title": "Technology Enablement Director",
-          "company": "BAE Systems",
-          "email": "aaron.mcauliffe@baesystems.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 67,
-          "why": "Technology enablement director at bae systems. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214396743326"
-        },
-        {
-          "rank": 39,
+          "rank": 36,
           "name": "Aaron Niedorf",
           "title": "Executive Vice President of Sales",
           "company": "IFC National Marketing",
@@ -2586,7 +2580,7 @@
           "hsId": "199950506326"
         },
         {
-          "rank": 40,
+          "rank": 37,
           "name": "Aaron Patel",
           "title": "Executive Vice President",
           "company": "Imagine Hospitality Management",
@@ -2601,37 +2595,7 @@
           "hsId": "199933687813"
         },
         {
-          "rank": 41,
-          "name": "Aaron Reason",
-          "title": "Senior Director - Information Security",
-          "company": "Consolidated Communications",
-          "email": "aaron.reason@consolidated.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 67,
-          "why": "Senior director - information security at consolidated communications. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214396267889"
-        },
-        {
-          "rank": 42,
-          "name": "Aaron Rohde",
-          "title": "Vice President of Sales",
-          "company": "SAP SuccessFactors",
-          "email": "aaron.rohde@sap.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 67,
-          "why": "Vice president of sales at sap successfactors. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214398861443"
-        },
-        {
-          "rank": 43,
+          "rank": 38,
           "name": "Aaron Straus",
           "title": "Vice President",
           "company": "Chem-Plate Industries",
@@ -2646,22 +2610,22 @@
           "hsId": "199950483811"
         },
         {
-          "rank": 44,
-          "name": "Aaron Titkemeier",
-          "title": "Senior Director Marketing and Merchandising",
-          "company": "Monro, Inc.",
-          "email": "aaron.titkemeier@monro.com",
+          "rank": 39,
+          "name": "Aaron Topper",
+          "title": "President",
+          "company": "Avina of Fond du Lac",
+          "email": "atopper@aahealthcaremgt.com",
           "phone": "",
           "country": "",
           "deals": 0,
           "tier": "PROSPECT",
           "score": 67,
-          "why": "Senior director marketing and merchandising at monro, inc.. Valid bd lead — initial outreach stage.",
+          "why": "President at avina of fond du lac. Valid bd lead — initial outreach stage.",
           "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "207051569268"
+          "hsId": "199872538142"
         },
         {
-          "rank": 45,
+          "rank": 40,
           "name": "Aaron Truan",
           "title": "President",
           "company": "Blue Diamond Attachments",
@@ -2676,52 +2640,22 @@
           "hsId": "199949506056"
         },
         {
-          "rank": 46,
-          "name": "Aaron Watt",
-          "title": "Product Owner",
-          "company": "Tesco Mobile",
-          "email": "aaron.watt@tescomobile.com",
+          "rank": 41,
+          "name": "Abbey Petkar",
+          "title": "Managing Director",
+          "company": "Magenta Security Ltd",
+          "email": "abbey@magentasecurity.co.uk",
           "phone": "",
           "country": "",
           "deals": 0,
           "tier": "PROSPECT",
           "score": 67,
-          "why": "Product owner at tesco mobile. Valid bd lead — initial outreach stage.",
+          "why": "Managing director at magenta security ltd. Valid bd lead — initial outreach stage.",
           "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214400637549"
+          "hsId": "199966803258"
         },
         {
-          "rank": 47,
-          "name": "Aarti Vaswani",
-          "title": "Associate Director Technical Product Support",
-          "company": "TriZetto Healthcare Products",
-          "email": "aarti.vaswani@cognizant.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 67,
-          "why": "Associate director technical product support at trizetto healthcare products. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214396819731"
-        },
-        {
-          "rank": 48,
-          "name": "Aasta Hughes",
-          "title": "Finance Director, North America",
-          "company": "Vesuvius",
-          "email": "aasta.hughes@vesuvius.com",
-          "phone": "",
-          "country": "",
-          "deals": 0,
-          "tier": "PROSPECT",
-          "score": 67,
-          "why": "Finance director, north america at vesuvius. Valid bd lead — initial outreach stage.",
-          "action": "Assign validity first, then personalised outreach to explore business needs.",
-          "hsId": "214389474990"
-        },
-        {
-          "rank": 49,
+          "rank": 42,
           "name": "Abbie Browne",
           "title": "Director",
           "company": "Rosevale Accountants Ltd",
@@ -2736,7 +2670,7 @@
           "hsId": "199311180650"
         },
         {
-          "rank": 50,
+          "rank": 43,
           "name": "Abdul Chowdhury",
           "title": "Director",
           "company": "Vertax Accountants Ltd",
@@ -2749,10 +2683,189 @@
           "why": "Director at vertax accountants ltd. Valid bd lead — initial outreach stage.",
           "action": "Assign validity first, then personalised outreach to explore business needs.",
           "hsId": "199259291988"
+        },
+        {
+          "rank": 44,
+          "name": "Abdul Rana",
+          "title": "Owner",
+          "company": "Rana & Co Accountants Ltd",
+          "email": "abdul@ranaandcoaccountants.co.uk",
+          "phone": "",
+          "country": "",
+          "deals": 0,
+          "tier": "PROSPECT",
+          "score": 67,
+          "why": "Owner at rana & co accountants ltd. Valid bd lead — initial outreach stage.",
+          "action": "Assign validity first, then personalised outreach to explore business needs.",
+          "hsId": "199218228393"
+        },
+        {
+          "rank": 45,
+          "name": "Abdullah Shoaib",
+          "title": "Director",
+          "company": "Energy Solutions (ES) Ltd.",
+          "email": "ashoaib@energysolutions.co.uk",
+          "phone": "",
+          "country": "",
+          "deals": 0,
+          "tier": "PROSPECT",
+          "score": 67,
+          "why": "Director at energy solutions (es) ltd.. Valid bd lead — initial outreach stage.",
+          "action": "Assign validity first, then personalised outreach to explore business needs.",
+          "hsId": "199949325751"
+        },
+        {
+          "rank": 46,
+          "name": "Abhijit Guha",
+          "title": "President",
+          "company": "Data Consultants Corp",
+          "email": "aguha@dccil.com",
+          "phone": "",
+          "country": "",
+          "deals": 0,
+          "tier": "PROSPECT",
+          "score": 67,
+          "why": "President at data consultants corp. Valid bd lead — initial outreach stage.",
+          "action": "Assign validity first, then personalised outreach to explore business needs.",
+          "hsId": "199933676202"
+        },
+        {
+          "rank": 47,
+          "name": "Abhijit Roy",
+          "title": "Consultant/Director",
+          "company": "Westgate Technologies Solution",
+          "email": "abhijit.roy@westgatetech.com",
+          "phone": "",
+          "country": "",
+          "deals": 0,
+          "tier": "PROSPECT",
+          "score": 67,
+          "why": "Consultant/director at westgate technologies solution. Valid bd lead — initial outreach stage.",
+          "action": "Assign validity first, then personalised outreach to explore business needs.",
+          "hsId": "199221479713"
+        },
+        {
+          "rank": 48,
+          "name": "Abid Masood",
+          "title": "Co-Founder | COO",
+          "company": "KAU Media Group",
+          "email": "abid.masood@kaumediagroup.com",
+          "phone": "",
+          "country": "",
+          "deals": 0,
+          "tier": "PROSPECT",
+          "score": 67,
+          "why": "Co-founder | coo at kau media group. Valid bd lead — initial outreach stage.",
+          "action": "Assign validity first, then personalised outreach to explore business needs.",
+          "hsId": "199967900990"
+        },
+        {
+          "rank": 49,
+          "name": "Abigael Randel",
+          "title": "Vice President Operations",
+          "company": "Colorado Golf & Turf, Inc.",
+          "email": "abbie@cologolfandturf.com",
+          "phone": "",
+          "country": "",
+          "deals": 0,
+          "tier": "PROSPECT",
+          "score": 67,
+          "why": "Vice president operations at colorado golf & turf, inc.. Valid bd lead — initial outreach stage.",
+          "action": "Assign validity first, then personalised outreach to explore business needs.",
+          "hsId": "199950318720"
+        },
+        {
+          "rank": 50,
+          "name": "Adah Ojile",
+          "title": "Founder and CEO",
+          "company": "Agentous Inc.",
+          "email": "adah.ojile@venturec.com",
+          "phone": "",
+          "country": "",
+          "deals": 0,
+          "tier": "PROSPECT",
+          "score": 67,
+          "why": "Founder and ceo at agentous inc.. Valid bd lead — initial outreach stage.",
+          "action": "Assign validity first, then personalised outreach to explore business needs.",
+          "hsId": "199967748981"
         }
       ]
     }
-  }
+  },
+  "monthly": [
+    {
+      "key": "2025-12",
+      "label": "Dec 2025",
+      "year": 2025,
+      "month": 12,
+      "partial": false,
+      "contacts": 265,
+      "valid": 64,
+      "connected": 46,
+      "validRate": 24.2,
+      "connectRate": 17.4
+    },
+    {
+      "key": "2026-01",
+      "label": "Jan 2026",
+      "year": 2026,
+      "month": 1,
+      "partial": false,
+      "contacts": 1328,
+      "valid": 83,
+      "connected": 50,
+      "validRate": 6.2,
+      "connectRate": 3.8
+    },
+    {
+      "key": "2026-02",
+      "label": "Feb 2026",
+      "year": 2026,
+      "month": 2,
+      "partial": false,
+      "contacts": 874,
+      "valid": 160,
+      "connected": 39,
+      "validRate": 18.3,
+      "connectRate": 4.5
+    },
+    {
+      "key": "2026-03",
+      "label": "Mar 2026",
+      "year": 2026,
+      "month": 3,
+      "partial": false,
+      "contacts": 249,
+      "valid": 83,
+      "connected": 30,
+      "validRate": 33.3,
+      "connectRate": 12.0
+    },
+    {
+      "key": "2026-04",
+      "label": "Apr 2026",
+      "year": 2026,
+      "month": 4,
+      "partial": false,
+      "contacts": 407,
+      "valid": 53,
+      "connected": 8,
+      "validRate": 13.0,
+      "connectRate": 2.0
+    },
+    {
+      "key": "2026-05",
+      "label": "May 2026",
+      "year": 2026,
+      "month": 5,
+      "partial": true,
+      "contacts": 20,
+      "valid": 3,
+      "connected": 0,
+      "validRate": 15.0,
+      "connectRate": 0.0
+    }
+  ]
 }
 </script>
 
@@ -3357,10 +3470,75 @@ function renderPaidDeals() {
 }
 
 /* ── INIT ── */
+/* ── MONTHLY PROGRESS ── */
+function renderMonthly() {
+  setEl('monthly-updated', REPORT.meta.lastUpdated);
+  var data = REPORT.monthly;
+  if (!data || !data.length) {
+    setHTML('monthly-table-body', '<tr><td colspan="6" style="color:var(--muted)">No monthly data available yet.</td></tr>');
+    return;
+  }
+  if (data.length >= 2) setEl('monthly-range-badge', data[0].label + ' – ' + data[data.length-1].label);
+
+  var html = '';
+  data.forEach(function(m, i) {
+    var prev = i > 0 ? data[i-1] : null;
+    var vsStr = '&mdash;', vsCls = 'badge-muted';
+    if (prev && prev.contacts > 0) {
+      var chg = Math.round((m.contacts - prev.contacts) / prev.contacts * 100);
+      vsStr = (chg >= 0 ? '&#9650; +' : '&#9660; ') + chg + '%';
+      vsCls = chg >= 0 ? 'badge-green' : (Math.abs(chg) > 20 ? 'badge-red' : 'badge-yellow');
+    }
+    var rowStyle = m.partial ? ' style="opacity:0.8"' : '';
+    html += '<tr' + rowStyle + '>';
+    html += '<td><strong>' + m.label + (m.partial ? ' <span style="color:var(--muted);font-size:11px">(partial)</span>' : '') + '</strong></td>';
+    html += '<td>' + m.contacts + '</td>';
+    html += '<td>' + m.valid + '</td>';
+    html += '<td style="color:var(--cyan);font-weight:600">' + m.validRate + '%</td>';
+    html += '<td>' + m.connected + '</td>';
+    html += '<td><span class="badge ' + vsCls + '">' + vsStr + '</span></td>';
+    html += '</tr>';
+  });
+  document.getElementById('monthly-table-body').innerHTML = html;
+
+  var ctx = document.getElementById('monthlyTrendChart');
+  if (!ctx) return;
+  if (charts.monthly) charts.monthly.destroy();
+  charts.monthly = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(function(m){ return m.label; }),
+      datasets: [
+        { label: 'Total Contacts', data: data.map(function(m){ return m.contacts; }),
+          backgroundColor: 'rgba(79,110,247,0.7)', borderColor: '#4f6ef7', borderWidth: 1, yAxisID: 'y' },
+        { label: 'Valid Leads', data: data.map(function(m){ return m.valid; }),
+          backgroundColor: 'rgba(6,182,212,0.7)', borderColor: '#06b6d4', borderWidth: 1, yAxisID: 'y' },
+        { label: 'Valid Rate %', data: data.map(function(m){ return m.validRate; }),
+          type: 'line', borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.08)',
+          pointBackgroundColor: '#22c55e', tension: 0.4, yAxisID: 'y2' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { labels: { color: '#94a3b8', font: FONT } } },
+      scales: {
+        x: { ticks: { color: '#64748b', font: FONT }, grid: { color: GRID } },
+        y: { position: 'left', ticks: { color: '#64748b', font: FONT }, grid: { color: GRID },
+             title: { display: true, text: 'Contacts', color: '#64748b', font: FONT } },
+        y2: { position: 'right', min: 0, max: 100,
+              ticks: { color: '#22c55e', font: FONT, callback: function(v){ return v + '%'; } },
+              grid: { drawOnChartArea: false },
+              title: { display: true, text: 'Valid Rate', color: '#22c55e', font: FONT } }
+      }
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   buildCharts();
   renderWeek(currentWeek);
   renderPaidDeals();
+  renderMonthly();
 });
 </script>
 

@@ -447,6 +447,62 @@ def fetch_top_50():
         })
     return result
 
+# ── MONTHLY CONTACTS ─────────────────────────────────────────────────────────
+
+def fetch_monthly_contacts(num_months=6):
+    """Fetch OA Business Development contact counts for each of the last N calendar months."""
+    now     = datetime.now(MANILA_TZ)
+    mo_names = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+    props   = [PROP_LEAD_CATEGORY, PROP_VALIDITY, PROP_LEAD_STATUS]
+    results = []
+
+    for i in range(num_months - 1, -1, -1):
+        offset = now.month - 1 - i          # Python floor-div handles negatives correctly
+        y      = now.year + offset // 12
+        m      = offset % 12 + 1
+
+        month_start = datetime(y, m, 1, 0, 0, 0, tzinfo=MANILA_TZ)
+        if m == 12:
+            month_end = datetime(y + 1, 1, 1, tzinfo=MANILA_TZ) - timedelta(seconds=1)
+        else:
+            month_end = datetime(y, m + 1, 1, tzinfo=MANILA_TZ) - timedelta(seconds=1)
+        is_partial = (i == 0)
+        if is_partial:
+            month_end = now.replace(hour=23, minute=59, second=59, microsecond=0)
+
+        label = f"{mo_names[m-1]} {y}"
+        print(f"    {label}...", end=" ", flush=True)
+
+        date_filters = [
+            {"propertyName": "createdate", "operator": "GTE", "value": to_iso(month_start)},
+            {"propertyName": "createdate", "operator": "LTE", "value": to_iso(month_end)},
+        ]
+        contacts = search_contacts_by_categories(list(OA_BD_VALUES), date_filters, props)
+
+        total     = len(contacts)
+        valid_c   = sum(1 for c in contacts
+                        if norm_validity(c.get("properties",{}).get(PROP_VALIDITY))
+                        in ("valid_strict","valid_ni"))
+        connected = sum(1 for c in contacts
+                        if is_connected(c.get("properties",{}).get(PROP_LEAD_STATUS)))
+        print(f"{total} contacts")
+
+        results.append({
+            "key":         f"{y}-{m:02d}",
+            "label":       label,
+            "year":        y,
+            "month":       m,
+            "partial":     is_partial,
+            "contacts":    total,
+            "valid":       valid_c,
+            "connected":   connected,
+            "validRate":   round(valid_c / total * 100, 1) if total else 0.0,
+            "connectRate": round(connected / total * 100, 1) if total else 0.0,
+        })
+
+    return results
+
+
 # ── PAID DEALS ────────────────────────────────────────────────────────────────
 
 def fetch_paid_deals():
@@ -514,7 +570,7 @@ def fetch_paid_deals():
 
 # ── HTML PATCH ────────────────────────────────────────────────────────────────
 
-def update_html(week_num, week_data, paid_deals_data, today):
+def update_html(week_num, week_data, paid_deals_data, monthly_data, today):
     print(f"  Patching {HTML_FILE}…")
     with open(HTML_FILE, "r", encoding="utf-8") as f:
         html = f.read()
@@ -534,6 +590,9 @@ def update_html(week_num, week_data, paid_deals_data, today):
 
     # 4. Overwrite paidDeals
     report["paidDeals"] = paid_deals_data
+
+    # 5. Overwrite monthly contacts
+    report["monthly"] = monthly_data
 
     new_json = json.dumps(report, indent=2, ensure_ascii=False, default=str)
     new_tag  = f'<script id="report-data" type="application/json">\n{new_json}\n</script>'
@@ -665,13 +724,18 @@ def main():
     print(f"  Deals created: {deals_count}")
 
     # Top 50 outreach
-    print("\n[3/4] Building top 50 outreach list…")
+    print("\n[3/5] Building top 50 outreach list…")
     top_accounts = fetch_top_50()
     print(f"  Top accounts: {len(top_accounts)}")
 
     # Paid deals
-    print("\n[4/4] Fetching paid deals…")
+    print("\n[4/5] Fetching Outbound Paid deals…")
     paid_deals = fetch_paid_deals()
+
+    # Monthly contacts
+    print("\n[5/5] Fetching monthly contact stats (last 6 months)…")
+    monthly_data = fetch_monthly_contacts(num_months=6)
+    print(f"  Monthly data: {len(monthly_data)} months fetched")
 
     # Build week object
     valid_total = stats["valid_strict"] + stats["valid_ni"]
@@ -709,7 +773,7 @@ def main():
 
     # Patch HTML
     print("\n[Patching HTML]")
-    update_html(week_num, week_data, paid_deals, today)
+    update_html(week_num, week_data, paid_deals, monthly_data, today)
 
     print(f"\nDone - Week {week_num} ({dates_label}) committed to HTML.")
     print(f"  Next update: next Tuesday\n")
