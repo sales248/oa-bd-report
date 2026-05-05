@@ -3866,7 +3866,7 @@
 <script>
 /* ── DATA ── */
 var REPORT = JSON.parse(document.getElementById('report-data').textContent);
-var currentWeek = 18;
+var currentWeek = Math.max.apply(null, Object.keys(REPORT.weeks).map(Number));
 var charts = {};
 
 /* ── FRESHNESS CHECK ── */

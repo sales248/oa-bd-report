@@ -535,11 +535,7 @@ def update_html(week_num, week_data, paid_deals_data, today):
     new_tag  = f'<script id="report-data" type="application/json">\n{new_json}\n</script>'
     html     = html[:m.start()] + new_tag + html[m.end():]
 
-    # 5. Update currentWeek JS variable
-    html = re.sub(r'var currentWeek\s*=\s*\d+;',
-                  f'var currentWeek = {week_num};', html)
-
-    # 6. Update meta data-last-updated
+    # 5. Update meta data-last-updated
     html = re.sub(r'content="[\d-]+"(\s+/>|>)\s*(?=\s*<meta name="data-cycle")',
                   f'content="{today.strftime("%Y-%m-%d")}"\\1\n  ', html)
 
