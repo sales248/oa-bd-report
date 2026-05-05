@@ -6,6 +6,33 @@
   <meta name="data-last-updated" content="2026-05-05" />
   <meta name="data-cycle" content="Tuesday-Monday" />
   <title>OA BD Weekly Report</title>
+  <script>
+    /* Password gate — runs before anything else renders */
+    (function() {
+      var PASSWORD = 'OA-BD-2026';
+      if (sessionStorage.getItem('oa_bd_unlocked') === '1') return;
+      document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('oa-gate').style.display = 'flex';
+        document.getElementById('oa-main-wrap').style.display = 'none';
+        document.getElementById('gate-input').focus();
+      });
+      window.__checkGate = function() {
+        var val = document.getElementById('gate-input').value;
+        if (val === PASSWORD) {
+          sessionStorage.setItem('oa_bd_unlocked', '1');
+          document.getElementById('oa-gate').style.display = 'none';
+          document.getElementById('oa-main-wrap').style.display = '';
+        } else {
+          var err = document.getElementById('gate-error');
+          err.style.display = 'block';
+          document.getElementById('gate-input').value = '';
+          document.getElementById('gate-input').focus();
+          setTimeout(function(){ err.style.display = 'none'; }, 2500);
+        }
+      };
+      window.__gateKeydown = function(e) { if (e.key === 'Enter') window.__checkGate(); };
+    })();
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
@@ -26,6 +53,45 @@
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* PASSWORD GATE */
+    #oa-gate {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: var(--bg);
+      align-items: center; justify-content: center;
+    }
+    .gate-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 48px 40px; width: 100%; max-width: 380px;
+      text-align: center;
+    }
+    .gate-logo {
+      width: 52px; height: 52px; margin: 0 auto 20px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 14px; display: grid; place-items: center;
+      font-weight: 800; font-size: 22px; color: #fff;
+    }
+    .gate-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .gate-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+    .gate-input {
+      width: 100%; padding: 12px 16px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text); font-size: 15px; outline: none;
+      transition: border-color .15s; margin-bottom: 12px;
+      text-align: center; letter-spacing: .1em;
+    }
+    .gate-input:focus { border-color: var(--accent); }
+    .gate-btn {
+      width: 100%; padding: 12px; border-radius: 8px;
+      background: var(--accent); color: #fff; border: none;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: opacity .15s; letter-spacing: .04em;
+    }
+    .gate-btn:hover { opacity: .85; }
+    .gate-error {
+      display: none; margin-top: 12px;
+      font-size: 13px; color: var(--red); font-weight: 600;
+    }
 
     /* HEADER */
     .header {
@@ -403,6 +469,22 @@
   </style>
 </head>
 <body>
+
+<!-- PASSWORD GATE OVERLAY -->
+<div id="oa-gate">
+  <div class="gate-card">
+    <div class="gate-logo">OA</div>
+    <div class="gate-title">OA BD Report</div>
+    <div class="gate-sub">Enter the password to access this report</div>
+    <input id="gate-input" class="gate-input" type="password"
+           placeholder="Password" onkeydown="__gateKeydown(event)" autocomplete="off" />
+    <button class="gate-btn" onclick="__checkGate()">Unlock</button>
+    <div id="gate-error" class="gate-error">Incorrect password. Please try again.</div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="oa-main-wrap">
 
 <!-- HEADER -->
 <header class="header">
@@ -3739,5 +3821,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+</div><!-- /oa-main-wrap -->
 </body>
 </html>
