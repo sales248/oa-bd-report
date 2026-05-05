@@ -477,7 +477,7 @@
         <div class="kpi-card" style="--accent-color:var(--accent)">
           <div class="kpi-label">Total Contacts</div>
           <div class="kpi-value" style="color:var(--accent)" id="kpi-contacts">77</div>
-          <div class="kpi-sub" id="kpi-contacts-sub">BD Lead category</div>
+          <div class="kpi-sub" id="kpi-contacts-sub">Inbound: — &middot; Outbound: —</div>
           <span class="kpi-delta down" id="kpi-contacts-delta">&#9660; 36% vs W16 (120)</span>
         </div>
         <div class="kpi-card" style="--accent-color:var(--cyan)">
@@ -495,7 +495,7 @@
         <div class="kpi-card" style="--accent-color:var(--accent2)">
           <div class="kpi-label">Deals Created</div>
           <div class="kpi-value" style="color:var(--accent2)" id="kpi-deals">27</div>
-          <div class="kpi-sub" id="kpi-deals-sub">4 BD &middot; 23 CS pipeline</div>
+          <div class="kpi-sub" id="kpi-deals-sub">BD pipeline</div>
           <span class="kpi-delta up" id="kpi-deals-delta">&#9650; +108% vs W16 (13)</span>
         </div>
       </div>
@@ -3960,8 +3960,9 @@ function renderWeek(wk) {
   setEl('kpi-valid', d.valid);
   setEl('kpi-connected', d.connected);
   setEl('kpi-deals', d.deals);
+  setHTML('kpi-contacts-sub', 'Inbound: ' + (d.inbound || 0) + ' &middot; Outbound: ' + (d.outbound || 0));
   setHTML('kpi-valid-sub', d.validStrict + ' Valid &middot; ' + d.validNI + ' Valid-NI');
-  setHTML('kpi-deals-sub', '4 BD &middot; ' + (d.deals - 4) + ' CS pipeline');
+  setHTML('kpi-deals-sub', d.deals > 0 ? d.deals + ' BD pipeline' : 'BD pipeline');
   setHTML('kpi-connected-sub', pct(d.connected, d.valid) + ' of valid leads');
 
   if (prev) {
@@ -3969,7 +3970,7 @@ function renderWeek(wk) {
     var vDelta = delta(d.valid, prev.valid);
     var connDelta = d.connected === prev.connected ? 'Flat' : delta(d.connected, prev.connected);
     var dealDelta = delta(d.deals, prev.deals);
-    setHTML('kpi-contacts-delta', (d.contacts < prev.contacts ? '&#9660; ' : '&#9650; ') + Math.abs(d.contacts - prev.contacts) + '% vs ' + prev.label + ' (' + prev.contacts + ')');
+    setHTML('kpi-contacts-delta', (d.contacts < prev.contacts ? '&#9660; ' : '&#9650; ') + Math.abs(parseFloat(cDelta)) + '% vs ' + prev.label + ' (' + prev.contacts + ')');
     setHTML('kpi-valid-delta', (d.valid < prev.valid ? '&#9660; ' : '&#9650; ') + Math.abs(parseFloat(vDelta)) + '% vs ' + prev.label + ' (' + prev.valid + ')');
     setHTML('kpi-connected-delta', connDelta === 'Flat' ? '&#61; Flat vs ' + prev.label : connDelta + ' vs ' + prev.label);
     setHTML('kpi-deals-delta', (d.deals > prev.deals ? '&#9650; ' : '&#9660; ') + dealDelta + ' vs ' + prev.label + ' (' + prev.deals + ')');
