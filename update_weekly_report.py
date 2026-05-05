@@ -41,7 +41,12 @@ PROP_LEAD_CATEGORY = "lead_category"   # Source/type of BD contact
 PROP_VALIDITY      = "lead_validity"   # Lead validity classification
 PROP_LEAD_STATUS   = "hs_lead_status"  # "CONNECTED" means lead replied/engaged
 
-# lead_category values → source bucket
+# "BD Lead" is the internal value for the "OA Business Development" lead category.
+# Only these contacts are counted for weekly reporting.
+OA_BD_VALUE     = "BD Lead"
+OA_BD_VALUES    = {OA_BD_VALUE}
+
+# Kept for top-50 pool and paid-deals (broader BD universe)
 INBOUND_VALUES  = {"BD Lead"}
 OUTBOUND_VALUES = {"OA Outbound", "BizDev Outbound", "Outbound Enterprise", "Duane Test"}
 SP_VALUES       = {"SP Lead", "SP Lead Enterprise"}
@@ -304,16 +309,15 @@ def build_action(tier, has_active_deal, connected):
 # ── WEEKLY CONTACTS STATS ─────────────────────────────────────────────────────
 
 def fetch_weekly_contacts(start, end):
-    """Fetch all BD-related contacts created in [start, end] and compute stats."""
-    # One filter group per BD category value (avoids IN operator quirks)
+    """Fetch OA Business Development contacts (lead_category = BD Lead) created in [start, end]."""
     date_filters = [
         {"propertyName": "createdate", "operator": "GTE", "value": to_iso(start)},
         {"propertyName": "createdate", "operator": "LTE", "value": to_iso(end)},
     ]
     props = [PROP_LEAD_CATEGORY, PROP_VALIDITY, PROP_LEAD_STATUS,
              "firstname","lastname","jobtitle","company","email","phone","hs_country_code"]
-    contacts = search_contacts_by_categories(list(ALL_BD_VALUES), date_filters, props)
-    print(f"  Weekly BD contacts found: {len(contacts)}")
+    contacts = search_contacts_by_categories(list(OA_BD_VALUES), date_filters, props)
+    print(f"  OA Business Development contacts found: {len(contacts)}")
 
     stats = dict(contacts_total=0, valid_strict=0, valid_ni=0, spam=0,
                  jobseeker=0, service_provider=0, unqualified=0, no_validity=0,
