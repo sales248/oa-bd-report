@@ -450,15 +450,15 @@ def fetch_top_50():
 # ── PAID DEALS ────────────────────────────────────────────────────────────────
 
 def fetch_paid_deals():
-    """Fetch deals with paid_recruitment_date and classify into HOT/ADVANCING/STALLED/CLOSED."""
+    """Fetch deals with lead_source = 'Outbound Paid' and classify into HOT/ADVANCING/STALLED/CLOSED."""
     filters = [
-        {"propertyName": "pipeline",              "operator": "EQ",           "value": BD_PIPELINE_ID},
-        {"propertyName": "paid_recruitment_date", "operator": "HAS_PROPERTY"},
+        {"propertyName": "pipeline",    "operator": "EQ", "value": BD_PIPELINE_ID},
+        {"propertyName": "lead_source", "operator": "EQ", "value": "Outbound Paid"},
     ]
-    props = ["dealname","dealstage","paid_recruitment_date","hs_lastmodifieddate",
+    props = ["dealname","dealstage","lead_source","paid_recruitment_date","hs_lastmodifieddate",
              "amount","hs_is_closed_won","hs_probability"]
     deals = search_all_deals(filters, props)
-    print(f"  Paid deals found: {len(deals)}")
+    print(f"  Outbound Paid deals found: {len(deals)}")
 
     now = datetime.now(MANILA_TZ)
     groups = {"HOT": [], "ADVANCING": [], "STALLED": [], "CLOSED": []}
