@@ -1131,10 +1131,12 @@ var charts = {};
       b.innerHTML = '&#9651; STALE &mdash; ' + diffDays + ' days old';
     }
   }
-  // Next update: next Tuesday
+  // Next update: next Tuesday after lastUpdated
   var next = new Date(lastUpdated);
-  next.setDate(next.getDate() + 7);
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var day = next.getDay(); // 0=Sun,1=Mon,2=Tue,3=Wed...
+  var daysToTuesday = (2 - day + 7) % 7 || 7; // min 7 if already Tuesday
+  next.setDate(next.getDate() + daysToTuesday);
   var lbl = document.getElementById('nextUpdateLabel');
   if (lbl) lbl.textContent = 'Next update: ' + months[next.getMonth()] + ' ' + next.getDate() + ', ' + next.getFullYear();
 })();
@@ -1380,12 +1382,17 @@ var FONT = { family: "'Segoe UI', system-ui, sans-serif", size: 12 };
 var GRID = 'rgba(46,50,72,0.8)';
 
 function buildCharts() {
+  /* Resolve last two weeks dynamically */
+  var weekKeys = Object.keys(REPORT.weeks).map(Number).sort(function(a,b){return a-b;});
+  var prevWk = weekKeys[weekKeys.length - 2] || weekKeys[0];
+  var currWk = weekKeys[weekKeys.length - 1] || prevWk;
+  var d16 = REPORT.weeks[prevWk], d17 = REPORT.weeks[currWk];
+
   /* Trend Chart */
-  var d16 = REPORT.weeks[16], d17 = REPORT.weeks[17];
   charts.trend = new Chart(document.getElementById('trendChart'), {
     type: 'line',
     data: {
-      labels: ['W16', 'W17'],
+      labels: [d16.label, d17.label],
       datasets: [
         { label: 'Contacts', data: [d16.contacts, d17.contacts], borderColor: '#4f6ef7', backgroundColor: 'rgba(79,110,247,.08)', tension: .4, fill: true, pointBackgroundColor: '#4f6ef7' },
         { label: 'Valid',    data: [d16.valid,    d17.valid],    borderColor: '#06b6d4', backgroundColor: 'rgba(6,182,212,.08)',  tension: .4, fill: true, pointBackgroundColor: '#06b6d4' },
@@ -1424,8 +1431,8 @@ function buildCharts() {
     data: {
       labels: ['Contacts', 'Valid', 'Connected', 'Deals'],
       datasets: [
-        { label: 'W16', data: [d16.contacts, d16.valid, d16.connected, d16.deals], backgroundColor: 'rgba(79,110,247,.5)', borderRadius: 4 },
-        { label: 'W17', data: [d17.contacts, d17.valid, d17.connected, d17.deals], backgroundColor: 'rgba(34,197,94,.7)',  borderRadius: 4 }
+        { label: d16.label, data: [d16.contacts, d16.valid, d16.connected, d16.deals], backgroundColor: 'rgba(79,110,247,.5)', borderRadius: 4 },
+        { label: d17.label, data: [d17.contacts, d17.valid, d17.connected, d17.deals], backgroundColor: 'rgba(34,197,94,.7)',  borderRadius: 4 }
       ]
     },
     options: {
