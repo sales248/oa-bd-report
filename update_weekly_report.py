@@ -417,6 +417,40 @@ def _fetch_deal_date_count(date_prop, start, end):
     r.raise_for_status()
     return r.json().get("total", 0)
 
+def fetch_dc_deals(start, end):
+    """Fetch BD pipeline deals with discovery_call_date in [start, end], returning company list."""
+    filters = [
+        {"propertyName": "pipeline",            "operator": "EQ",  "value": BD_PIPELINE_ID},
+        {"propertyName": "discovery_call_date", "operator": "GTE", "value": str(_date_ms(start))},
+        {"propertyName": "discovery_call_date", "operator": "LTE", "value": str(_date_ms(end))},
+    ]
+    props = ["dealname", "discovery_call_date", "discovery_call_attendance", "dealstage"]
+    results, after = [], None
+    while True:
+        body = {"filterGroups": [{"filters": filters}], "properties": props, "limit": 100}
+        if after:
+            body["after"] = after
+        r = requests.post(f"{BASE_URL}/crm/v3/objects/deals/search", headers=HEADERS, json=body)
+        r.raise_for_status()
+        data = r.json()
+        results.extend(data.get("results", []))
+        after = data.get("paging", {}).get("next", {}).get("after")
+        if not after:
+            break
+
+    deals = []
+    for d in results:
+        p = d.get("properties", {})
+        deals.append({
+            "id":         d["id"],
+            "company":    p.get("dealname", "Unknown"),
+            "dcDate":     p.get("discovery_call_date", ""),
+            "attendance": p.get("discovery_call_attendance", ""),
+            "stage":      STAGE_LABELS.get(p.get("dealstage", ""), p.get("dealstage", "")),
+        })
+    deals.sort(key=lambda x: x["dcDate"])
+    return deals
+
 def fetch_deals_created_count(start, end):
     filters = [
         {"propertyName": "pipeline",   "operator": "EQ",  "value": BD_PIPELINE_ID},
@@ -805,8 +839,9 @@ def main():
     print("\n[3/5] Counting weekly deal metrics…")
     deals_count = fetch_deals_created_count(start, end)
     sa_signed   = fetch_sa_signed_count(start, end)
-    dc_count    = _fetch_deal_date_count("discovery_call_date", start, end)
-    ac_count    = _fetch_deal_date_count("alignment_call_date",  start, end)
+    dc_deals    = fetch_dc_deals(start, end)
+    dc_count    = len(dc_deals)
+    ac_count    = _fetch_deal_date_count("alignment_call_date", start, end)
     print(f"  Deals created: {deals_count} | SA signed: {sa_signed} | DC: {dc_count} | AC: {ac_count}")
 
     # Top 50 outreach
@@ -858,6 +893,7 @@ def main():
         "dealProgress":      weekly_deals_progress,
         "saSigned":          sa_signed,
         "dcCount":           dc_count,
+        "dcDeals":           dc_deals,
         "acCount":           ac_count,
     }
 
