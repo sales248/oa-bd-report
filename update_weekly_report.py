@@ -800,6 +800,50 @@ def discover_properties():
     print("\n─────────────────────────────────────────────")
     print("Edit PROP_VALIDITY, PROP_SOURCE_TYPE, PROP_CONNECTED at the top of this script.")
 
+# ── BACKFILL ─────────────────────────────────────────────────────────────────
+
+def backfill_missing_fields():
+    """Patch all weeks in the HTML that are missing saSigned / dcCount / acCount."""
+    print(f"\n[BACKFILL] Reading {HTML_FILE}…")
+    with open(HTML_FILE, "r", encoding="utf-8") as f:
+        html = f.read()
+    m = re.search(r'<script id="report-data" type="application/json">(.*?)</script>', html, re.DOTALL)
+    if not m:
+        raise RuntimeError("Could not find report-data script tag")
+    report = json.loads(m.group(1))
+
+    patched = 0
+    for wk_str, d in sorted(report["weeks"].items(), key=lambda x: int(x[0])):
+        if "saSigned" in d and "dcCount" in d and "acCount" in d:
+            print(f"  W{wk_str}: already complete, skipping")
+            continue
+
+        start = datetime.fromisoformat(d["startDate"]).replace(
+            hour=0, minute=0, second=0, tzinfo=MANILA_TZ)
+        end   = datetime.fromisoformat(d["endDate"]).replace(
+            hour=23, minute=59, second=59, tzinfo=MANILA_TZ)
+        print(f"  W{wk_str}: fetching missing fields ({d['startDate']} to {d['endDate']})…", flush=True)
+
+        d["saSigned"] = fetch_sa_signed_count(start, end)
+        dc_deals      = fetch_dc_deals(start, end)
+        d["dcCount"]  = len(dc_deals)
+        d["dcDeals"]  = dc_deals
+        d["acCount"]  = _fetch_deal_date_count("alignment_call_date", start, end)
+
+        print(f"    SA={d['saSigned']} DC={d['dcCount']} AC={d['acCount']}")
+        patched += 1
+
+    if patched == 0:
+        print("  Nothing to backfill.")
+        return
+
+    new_json = json.dumps(report, indent=2, ensure_ascii=False, default=str)
+    new_tag  = f'<script id="report-data" type="application/json">\n{new_json}\n</script>'
+    html     = html[:m.start()] + new_tag + html[m.end():]
+    with open(HTML_FILE, "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"  Backfilled {patched} week(s). HTML saved.")
+
 # ── MAIN ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -808,6 +852,13 @@ def main():
             print("ERROR: set HUBSPOT_TOKEN before running --discover")
             sys.exit(1)
         discover_properties()
+        return
+
+    if "--backfill" in sys.argv:
+        if not HUBSPOT_TOKEN:
+            print("ERROR: set HUBSPOT_TOKEN before running --backfill")
+            sys.exit(1)
+        backfill_missing_fields()
         return
 
     if not HUBSPOT_TOKEN:
