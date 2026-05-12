@@ -1055,25 +1055,25 @@
     <!-- ===== PAGE: OUTBOUND PAID DEAL PROGRESS ===== -->
     <div class="page" id="page-paid">
       <div class="section-title">Outbound Paid Lead Progress</div>
-      <div class="section-sub">Deal pipeline for Outbound Paid leads &middot; OA Business Development &middot; As of 2026-04-29</div>
+      <div class="section-sub">Deal pipeline for Outbound Paid leads &middot; OA Business Development &middot; As of <span id="pd-as-of">—</span></div>
 
       <!-- KPI CARDS -->
       <div class="pd-kpi-grid">
         <div class="pd-kpi-card" style="border-top:3px solid var(--text)">
           <div class="pd-kpi-label">Total Deals</div>
-          <div class="pd-kpi-value" style="color:var(--text)">14</div>
+          <div class="pd-kpi-value" style="color:var(--text)" id="pd-kpi-total">—</div>
         </div>
         <div class="pd-kpi-card" style="border-top:3px solid var(--accent)">
           <div class="pd-kpi-label">Active</div>
-          <div class="pd-kpi-value" style="color:var(--accent)">11</div>
+          <div class="pd-kpi-value" style="color:var(--accent)" id="pd-kpi-active">—</div>
         </div>
         <div class="pd-kpi-card" style="border-top:3px solid var(--green)">
           <div class="pd-kpi-label">Hot (&ge;50%)</div>
-          <div class="pd-kpi-value" style="color:var(--green)">1</div>
+          <div class="pd-kpi-value" style="color:var(--green)" id="pd-kpi-hot">—</div>
         </div>
         <div class="pd-kpi-card" style="border-top:3px solid var(--red)">
           <div class="pd-kpi-label">Closed Lost</div>
-          <div class="pd-kpi-value" style="color:var(--red)">2</div>
+          <div class="pd-kpi-value" style="color:var(--red)" id="pd-kpi-closed-lost">—</div>
         </div>
       </div>
 
@@ -4462,6 +4462,18 @@ function renderPaidDeals() {
   if (!el) return;
   var pd = REPORT.paidDeals;
   if (!pd || !pd.groups) { el.innerHTML = '<div class="outreach-no-data">No paid deal data available.</div>'; return; }
+
+  /* KPI cards — computed from live data */
+  var g = pd.groups;
+  var total      = (g.HOT||[]).length + (g.ADVANCING||[]).length + (g.STALLED||[]).length + (g.CLOSED||[]).length;
+  var active     = (g.HOT||[]).length + (g.ADVANCING||[]).length + (g.STALLED||[]).length;
+  var hot        = (g.HOT||[]).length;
+  var closedLost = (g.CLOSED||[]).filter(function(d){ return d.closedWon === false; }).length;
+  setEl('pd-kpi-total',       total);
+  setEl('pd-kpi-active',      active);
+  setEl('pd-kpi-hot',         hot);
+  setEl('pd-kpi-closed-lost', closedLost);
+  setEl('pd-as-of',           pd.lastQueried || '—');
 
   var groupDefs = [
     { key: 'HOT',       hdr: 'hdr-hot',       title: 'HOT &mdash; AC Completed &middot; Schedule closing call now',              stageCls: 'pd-stage-hot' },
