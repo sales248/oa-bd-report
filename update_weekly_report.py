@@ -393,7 +393,25 @@ def fetch_weekly_contacts(start, end):
 
     return stats, [c["id"] for c in contacts]
 
-# ── WEEKLY DEALS COUNT ────────────────────────────────────────────────────────
+# ── WEEKLY DEALS COUNT + SA SIGNED ───────────────────────────────────────────
+
+def _date_ms(dt):
+    """Convert a date/datetime to midnight-UTC milliseconds for HubSpot date-type filters."""
+    from datetime import timezone as _tz
+    d = dt.date() if hasattr(dt, "date") else dt
+    return int(datetime(d.year, d.month, d.day, tzinfo=_tz.utc).timestamp() * 1000)
+
+def fetch_sa_signed_count(start, end):
+    """Count BD pipeline deals where pandadoc_signed date falls within [start, end]."""
+    filters = [
+        {"propertyName": "pipeline",        "operator": "EQ",  "value": BD_PIPELINE_ID},
+        {"propertyName": "pandadoc_signed",  "operator": "GTE", "value": str(_date_ms(start))},
+        {"propertyName": "pandadoc_signed",  "operator": "LTE", "value": str(_date_ms(end))},
+    ]
+    body = {"filterGroups": [{"filters": filters}], "properties": ["hs_object_id"], "limit": 1}
+    r = requests.post(f"{BASE_URL}/crm/v3/objects/deals/search", headers=HEADERS, json=body)
+    r.raise_for_status()
+    return r.json().get("total", 0)
 
 def fetch_deals_created_count(start, end):
     filters = [
@@ -531,7 +549,8 @@ def fetch_monthly_contacts(num_months=6):
 
         contact_ids  = [c["id"] for c in contacts]
         deals_prog   = fetch_deals_progress(contact_ids)
-        print(f"| {deals_prog['total']} deals")
+        sa_signed    = fetch_sa_signed_count(month_start, month_end)
+        print(f"| {deals_prog['total']} deals | {sa_signed} SA signed")
 
         results.append({
             "key":         f"{y}-{m:02d}",
@@ -545,6 +564,7 @@ def fetch_monthly_contacts(num_months=6):
             "validRate":   round(valid_c / total * 100, 1) if total else 0.0,
             "connectRate": round(connected / total * 100, 1) if total else 0.0,
             "dealProgress": deals_prog,
+            "saSigned":    sa_signed,
         })
 
     return results
@@ -773,10 +793,11 @@ def main():
           f"{weekly_deals_progress['acAttended']} AC | "
           f"{weekly_deals_progress['paid']} Paid")
 
-    # Weekly deals count (new deals created this week — separate metric)
-    print("\n[3/5] Counting deals created this week…")
+    # Weekly deals count + SA signed this week
+    print("\n[3/5] Counting deals created + SA signed this week…")
     deals_count = fetch_deals_created_count(start, end)
-    print(f"  Deals created: {deals_count}")
+    sa_signed   = fetch_sa_signed_count(start, end)
+    print(f"  Deals created: {deals_count} | SA signed: {sa_signed}")
 
     # Top 50 outreach
     print("\n[4/5] Building top 50 outreach list…")
@@ -825,6 +846,7 @@ def main():
         "spConnected":       stats["sp_connected"],
         "topAccounts":       top_accounts,
         "dealProgress":      weekly_deals_progress,
+        "saSigned":          sa_signed,
     }
 
     # Patch HTML
