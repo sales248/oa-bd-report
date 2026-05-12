@@ -403,10 +403,14 @@ def _date_ms(dt):
 
 def fetch_sa_signed_count(start, end):
     """Count BD pipeline deals where pandadoc_signed date falls within [start, end]."""
+    return _fetch_deal_date_count("pandadoc_signed", start, end)
+
+def _fetch_deal_date_count(date_prop, start, end):
+    """Count BD pipeline deals where a given date property falls within [start, end]."""
     filters = [
-        {"propertyName": "pipeline",        "operator": "EQ",  "value": BD_PIPELINE_ID},
-        {"propertyName": "pandadoc_signed",  "operator": "GTE", "value": str(_date_ms(start))},
-        {"propertyName": "pandadoc_signed",  "operator": "LTE", "value": str(_date_ms(end))},
+        {"propertyName": "pipeline",  "operator": "EQ",  "value": BD_PIPELINE_ID},
+        {"propertyName": date_prop,   "operator": "GTE", "value": str(_date_ms(start))},
+        {"propertyName": date_prop,   "operator": "LTE", "value": str(_date_ms(end))},
     ]
     body = {"filterGroups": [{"filters": filters}], "properties": ["hs_object_id"], "limit": 1}
     r = requests.post(f"{BASE_URL}/crm/v3/objects/deals/search", headers=HEADERS, json=body)
@@ -550,7 +554,9 @@ def fetch_monthly_contacts(num_months=6):
         contact_ids  = [c["id"] for c in contacts]
         deals_prog   = fetch_deals_progress(contact_ids)
         sa_signed    = fetch_sa_signed_count(month_start, month_end)
-        print(f"| {deals_prog['total']} deals | {sa_signed} SA signed")
+        dc_count     = _fetch_deal_date_count("discovery_call_date", month_start, month_end)
+        ac_count     = _fetch_deal_date_count("alignment_call_date",  month_start, month_end)
+        print(f"| {deals_prog['total']} deals | {sa_signed} SA | {dc_count} DC | {ac_count} AC")
 
         results.append({
             "key":         f"{y}-{m:02d}",
@@ -565,6 +571,8 @@ def fetch_monthly_contacts(num_months=6):
             "connectRate": round(connected / total * 100, 1) if total else 0.0,
             "dealProgress": deals_prog,
             "saSigned":    sa_signed,
+            "dcCount":     dc_count,
+            "acCount":     ac_count,
         })
 
     return results
@@ -793,11 +801,13 @@ def main():
           f"{weekly_deals_progress['acAttended']} AC | "
           f"{weekly_deals_progress['paid']} Paid")
 
-    # Weekly deals count + SA signed this week
-    print("\n[3/5] Counting deals created + SA signed this week…")
+    # Weekly deal metrics
+    print("\n[3/5] Counting weekly deal metrics…")
     deals_count = fetch_deals_created_count(start, end)
     sa_signed   = fetch_sa_signed_count(start, end)
-    print(f"  Deals created: {deals_count} | SA signed: {sa_signed}")
+    dc_count    = _fetch_deal_date_count("discovery_call_date", start, end)
+    ac_count    = _fetch_deal_date_count("alignment_call_date",  start, end)
+    print(f"  Deals created: {deals_count} | SA signed: {sa_signed} | DC: {dc_count} | AC: {ac_count}")
 
     # Top 50 outreach
     print("\n[4/5] Building top 50 outreach list…")
@@ -847,6 +857,8 @@ def main():
         "topAccounts":       top_accounts,
         "dealProgress":      weekly_deals_progress,
         "saSigned":          sa_signed,
+        "dcCount":           dc_count,
+        "acCount":           ac_count,
     }
 
     # Patch HTML
