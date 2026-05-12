@@ -637,7 +637,7 @@
           <canvas id="trendChart"></canvas>
         </div>
         <div class="chart-card">
-          <h3>Lead Disposition (W17)</h3>
+          <h3 id="disposition-title">Lead Disposition</h3>
           <canvas id="dispositionChart" style="max-height:220px"></canvas>
         </div>
       </div>
@@ -4030,6 +4030,7 @@ function renderWeek(wk) {
 
   /* Header */
   setEl('currentWeekLabel', d.label + ' · ' + d.dates + ', ' + d.year);
+  setEl('disposition-title', 'Lead Disposition (' + d.label + ')');
   setHTML('summary-sub',  'OA Business Development &middot; ' + d.label + ' &middot; ' + d.dates + ', ' + d.year);
   setHTML('funnel-sub',   'Contact &rarr; Valid &rarr; Connected &rarr; Deal &middot; ' + d.label);
   setHTML('sources-sub',  'SP vs Outbound vs Inbound &middot; Quality by source &middot; ' + d.label);
